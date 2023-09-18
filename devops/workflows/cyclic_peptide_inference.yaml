@@ -51,12 +51,6 @@ spec:
           sed -i "s/offset = pos\[:, None\] - pos\[None, :\]/offset = pos[:, None] - pos[None, :]\nbinder_len=jnp.sum(asym_id == 0)\noffset = utils.add_cyclic_offset(offset,binder_len)\n/g" $SITEPACKAGES/alphafold/model/modules_multimer.py
           sed -i "s/offset = pos\[:,None\] - pos\[None,:\]/offset = pos[:,None] - pos[None,:]\noffset = utils.add_cyclic_offset(offset,len(pos))\n/g" $SITEPACKAGES/alphafold/model/modules.py
 
-          echo "Files after changes:"
-          echo "===================="
-          cat $SITEPACKAGES/alphafold/model/utils.py
-          cat $SITEPACKAGES/alphafold/model/modules.py
-          cat $SITEPACKAGES/alphafold/model/modules_multimer.py
-
           mkdir -p /results
           colabfold_batch \
             /sequence.fasta \
