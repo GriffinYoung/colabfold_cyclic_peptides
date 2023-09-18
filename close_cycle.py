@@ -23,14 +23,14 @@ def main():
 
     args = parser.parse_args()
     st = StructureReader.read(args.structure_file)
-    st = close_cycle(st)
-    out_file = args.structure_file.split('.')[0] + '_closed.mae'
-    st.write(out_file)
+    cyclized_st = close_cycle(st)
     options = prepwizard.PrepWizardSettings()
-    st = prepwizard.prepare_structure(st, options)[0]
-    out_file = args.structure_file.split('.')[0] + '_closed_prepped.mae'
-    with os.mkdir(args.out_dir):
-        st.write(os.path.join(args.out_dir, out_file))
+    prepped_st = prepwizard.prepare_structure(cyclized_st, options)[0]
+    os.mkdir(args.out_dir)
+    cyclized_out_file = args.structure_file.split('.')[0] + '_closed.mae'
+    prepped_out_file = args.structure_file.split('.')[0] + '_closed_prepped.mae'
+    cyclized_st.write(os.path.join(args.out_dir, cyclized_out_file))
+    prepped_st.write(os.path.join(args.out_dir, prepped_out_file))
 
 if __name__ == "__main__":
     main()
