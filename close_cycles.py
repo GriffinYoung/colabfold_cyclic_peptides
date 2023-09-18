@@ -15,9 +15,6 @@ def close_cycle(st: Structure):
     c_carbon.addBond(n_nitrogen, 1)
     return st
 
-def get_cyclized_peptide(structure_file: str):
-    
-    return st
 
 def main():
     parser = argparse.ArgumentParser(description='Connect the ends of a pepride chain')
@@ -42,7 +39,6 @@ def main():
             print('Peptide is not cyclizable')
             continue
         st = prepwizard.prepare_structure(st, options)[0]
-        st = get_cyclized_peptide(structure_file)
         uh = os.path.join(args.out_dir, header)
         os.makedirs(uh, exist_ok=True)
         prepped_out_file = fname.split('.')[0] + '_closed_prepped.mae'
