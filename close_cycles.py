@@ -36,13 +36,16 @@ def main():
         try:
             st = close_cycle(st)
         except ValueError:
-            print('Peptide is not cyclizable')
+            print(f'Skipping {fname}, termini too far apart')
             continue
-        st = prepwizard.prepare_structure(st, options)[0]
-        uh = os.path.join(args.out_dir, header)
-        os.makedirs(uh, exist_ok=True)
+        try:
+            st = prepwizard.prepare_structure(st, options)[0]
+        except:
+            print(f'{fname} protein prep failed')
+        jobdir = os.path.join(args.out_dir, header)
+        os.makedirs(jobdir, exist_ok=True)
         prepped_out_file = fname.split('.')[0] + '_closed_prepped.mae'
-        st.write(os.path.join(uh, prepped_out_file))
+        st.write(os.path.join(jobdir, prepped_out_file))
     
 if __name__ == "__main__":
     main()
