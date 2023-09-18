@@ -35,7 +35,7 @@ spec:
               bucket: alphafold-inference
               key: "{{workflow.parameters.output-gcs-path}}/results.tgz"
       script:
-        image: gcr.io/ddag-gke/psp/stages/stage1:latest
+        image: nvidia/cuda:11.1.1-devel-ubuntu20.04
         command: [bash]
         source: |
           apt-get update && apt-get -y install curl wget
