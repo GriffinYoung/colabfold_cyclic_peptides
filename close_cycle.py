@@ -26,7 +26,7 @@ def main():
     st = close_cycle(st)
     out_file = args.structure_file.split('.')[0] + '_closed.mae'
     st.write(out_file)
-    options = {}#prepwizard.PrepWizardSettings()
+    options = prepwizard.PrepWizardSettings()
     st = prepwizard.prepare_structure(st, options)[0]
     out_file = args.structure_file.split('.')[0] + '_closed_prepped.mae'
     with os.mkdir(args.out_dir):
