@@ -53,9 +53,9 @@ spec:
 
           echo "Files after changes:"
           echo "===================="
-          echo $SITEPACKAGES/alphafold/model/utils.py
-          echo $SITEPACKAGES/alphafold/model/modules.py
-          echo $SITEPACKAGES/alphafold/model/modules_multimer.py
+          cat $SITEPACKAGES/alphafold/model/utils.py
+          cat $SITEPACKAGES/alphafold/model/modules.py
+          cat $SITEPACKAGES/alphafold/model/modules_multimer.py
 
           mkdir -p /results
           colabfold_batch \
