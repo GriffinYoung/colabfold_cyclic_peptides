@@ -38,25 +38,14 @@ spec:
         image: nvidia/cuda:11.1.1-devel-ubuntu20.04
         command: [bash]
         source: |
-          apt-get update && apt-get -y install curl wget git
-          apt-get -y install curl # for install_colabbatch_linux.sh
-          wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && bash install_colabbatch_linux.sh
-          export COLABFOLDDIR="localcolabfold"
-          export PATH="${COLABFOLDDIR}/colabfold-conda/bin:$PATH"
-          export SITEPACKAGES="${COLABFOLDDIR}/colabfold-conda/lib/python3.10/site-packages/"
-          source activate /colabfold_batch/colabfold-conda
-          export PYTHONPATH="${SITEPACKAGES}:$PYTHONPATH"
-
-          printf "\ndef add_cyclic_offset(offset, L):\n  max_dist = (L // 2)\n  idxs = jnp.arange(offset.shape[0])\n  i = idxs[:,None]\n  j = idxs[None,:]\n  set_indices = (i < L) & (j < L)\n  dists = abs(j - i)\n  dists = jnp.where((dists > max_dist), L - dists, dists)\n  upper_right = (i < j)\n  offset = jnp.where(set_indices & upper_right, -dists, offset)\n  offset = jnp.where(set_indices & ~upper_right, dists, offset)\n  return offset" >> $SITEPACKAGES/alphafold/model/utils.py
-          sed -i "s/offset = pos\[:, None\] - pos\[None, :\]/offset = pos[:, None] - pos[None, :]\nbinder_len=jnp.sum(asym_id == 0)\noffset = utils.add_cyclic_offset(offset,binder_len)\n/g" $SITEPACKAGES/alphafold/model/modules_multimer.py
-          sed -i "s/offset = pos\[:,None\] - pos\[None,:\]/offset = pos[:,None] - pos[None,:]\noffset = utils.add_cyclic_offset(offset,len(pos))\n/g" $SITEPACKAGES/alphafold/model/modules.py
-
-          mkdir -p /results
+          mkdir -p /raw_results
           colabfold_batch \
             /sequence.fasta \
-            /results \
+            /raw_results \
             {{inputs.parameters.extra-args}}
 
+          mkdir -p /results
+          $SCHRODINGER/run close_cycles.py /raw_results /results
           
         resources:
           requests:
