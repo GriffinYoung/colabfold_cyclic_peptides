@@ -4,13 +4,15 @@ from schrodinger.structutils.measure import measure_distance
 import os
 import argparse
 
+MAX_PEPTIDE_BOND_LENGTH = 4.0
+
 def close_cycle(st: Structure):
     binder = list(st.chain)[0]
     n_term = list(binder.residue)[0]
     c_term = list(binder.residue)[-1]
     c_carbon = c_term.getCarbonylCarbon()
     n_nitrogen = n_term.getBackboneNitrogen()
-    if measure_distance(c_carbon, n_nitrogen) > 2.0:
+    if measure_distance(c_carbon, n_nitrogen) > MAX_PEPTIDE_BOND_LENGTH:
         raise ValueError('Peptide is not cyclizable')
     c_carbon.addBond(n_nitrogen, 1)
     return st
