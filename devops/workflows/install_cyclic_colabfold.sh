@@ -9,4 +9,4 @@ printf "\ndef add_cyclic_offset(offset, L):\n  max_dist = (L // 2)\n  idxs = jnp
 sed -i "s/offset = pos\[:, None\] - pos\[None, :\]/offset = pos[:, None] - pos[None, :]\n    binder_len=jnp.sum(asym_id == 0)\n    offset = utils.add_cyclic_offset(offset,binder_len)\n/g" $SITEPACKAGES/alphafold/model/modules_multimer.py
 sed -i "s/offset = pos\[:,None\] - pos\[None,:\]/offset = pos[:,None] - pos[None,:]\n\toffset = utils.add_cyclic_offset(offset,len(pos))\n/g" $SITEPACKAGES/alphafold/model/modules.py
 
-gsutil -m cp -r $COLABFOLDDIR gs://alphafold-environments/cyclic_peptide_environment
+#gsutil -m cp -r $COLABFOLDDIR gs://alphafold-environments/cyclic_peptide_environment
