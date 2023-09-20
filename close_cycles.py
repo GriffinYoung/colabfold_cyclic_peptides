@@ -4,7 +4,7 @@ from schrodinger.structutils.measure import measure_distance
 import os
 import argparse
 
-MAX_PEPTIDE_BOND_LENGTH = 4.0
+MAX_PEPTIDE_BOND_LENGTH = 1.5
 
 def close_cycle(st: Structure):
     binder = list(st.chain)[0]
@@ -12,8 +12,9 @@ def close_cycle(st: Structure):
     c_term = list(binder.residue)[-1]
     c_carbon = c_term.getCarbonylCarbon()
     n_nitrogen = n_term.getBackboneNitrogen()
-    if measure_distance(c_carbon, n_nitrogen) > MAX_PEPTIDE_BOND_LENGTH:
-        raise ValueError('Peptide is not cyclizable')
+    peptide_bond_length = measure_distance(c_carbon, n_nitrogen)
+    if peptide_bond_length > MAX_PEPTIDE_BOND_LENGTH:
+        raise ValueError(f'Peptide bond of length {peptide_bond_length} is too long to close.')
     c_carbon.addBond(n_nitrogen, 1)
     return st
 
@@ -37,8 +38,8 @@ def main():
         st = StructureReader.read(structure_file)
         try:
             st = close_cycle(st)
-        except ValueError:
-            print(f'Skipping {fname}, termini too far apart')
+        except ValueError as e:
+            print(f'Skipping {fname}: {e}')
             continue
         try:
             st = prepwizard.prepare_structure(st, options)[0]
