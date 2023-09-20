@@ -1,7 +1,7 @@
 export COLABFOLDDIR="localcolabfold"
-mkdir -p $COLABFOLDDIR
+#mkdir -p $COLABFOLDDIR
 # Try copying existing environment
-gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_environment/* $COLABFOLDDIR
+#gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_environment/* $COLABFOLDDIR
 if ! [ -d $COLABFOLDDIR ]; then
     # Install colabfold
     apt-get update && apt-get -y install curl wget git
@@ -15,7 +15,7 @@ if ! [ -d $COLABFOLDDIR ]; then
     sed -i "s/offset = pos\[:,None\] - pos\[None,:\]/offset = pos[:,None] - pos[None,:]\n        offset = utils.add_cyclic_offset(offset,len(pos))\n/g" $SITEPACKAGES/alphafold/model/modules.py
 
     # Save the environment
-    gsutil -m cp -r $COLABFOLDDIR gs://alphafold-environments/cyclic_peptide_environment
+    #gsutil -m cp -r $COLABFOLDDIR gs://alphafold-environments/cyclic_peptide_environment
 fi
 
 # Add to path so colabfold_batch can be called
