@@ -6,7 +6,7 @@ if ! [ -d $COLABFOLDDIR ]; then
     # Install colabfold
     apt-get update && apt-get -y install curl wget git
     apt-get -y install curl # for install_colabbatch_linux.sh
-    wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && bash install_colabbatch_linux.sh
+    wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && source install_colabbatch_linux.sh
     conda activate $COLABFOLDDIR/colabfold-conda
     conda install -c nvidia cuda-nvcc
 
