@@ -8,7 +8,7 @@ if ! [ -d $COLABFOLDDIR ]; then
     apt-get -y install curl # for install_colabbatch_linux.sh
     wget https://raw.githubusercontent.com/YoshitakaMo/localcolabfold/main/install_colabbatch_linux.sh && source install_colabbatch_linux.sh
     conda activate $COLABFOLDDIR/colabfold-conda
-    conda install -c nvidia cuda-nvcc
+    conda install -c "nvidia/label/cuda-12.0.0" cuda-nvcc
 
     # Modify colabfold to handle cyclic peptides
     export SITEPACKAGES="${COLABFOLDDIR}/colabfold-conda/lib/python3.10/site-packages/"
