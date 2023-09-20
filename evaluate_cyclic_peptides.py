@@ -80,7 +80,7 @@ def align_ligands(ref_lig: structure.Structure,
 
 
 def get_rmsd(st_ref, st_pred):
-    return cealign(st_ref, st_pred).rmsd
+    return cealign(st_ref, st_pred, window_size=4).rmsd
     st_pred = align_ligands(st_ref, [st_pred])[0]
 
     # Calculate the RMS against the originals:
