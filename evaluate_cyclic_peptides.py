@@ -13,7 +13,7 @@ import argparse
 import matplotlib.pyplot as plt
 
 def get_rmsd(st_ref, st_pred):
-    return cealign(st_ref, st_pred, window_size=2).rmsd
+    return cealign(st_ref, st_pred, window_size=2, max_gap=0).rmsd
 
 def get_pdb_st(pdb_id:str):
     pdb_list = PDBList()
