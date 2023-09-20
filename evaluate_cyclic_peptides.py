@@ -94,21 +94,34 @@ def get_pdb_st(pdb_id:str):
     os.remove(fname)
     return st
 
-rmsd_dict = defaultdict(list)
-raw_results_dir = "/Users/young1/Downloads/raw_results 3"
-for fname in os.listdir(raw_results_dir):
-    if not fname.endswith('.pdb'):
-        continue
-    print(fname)
-    pdb_id = fname.split('_unrelaxed')[0]
-    ref_st = get_pdb_st(pdb_id)
-    af_st = structure.StructureReader.read(os.path.join(raw_results_dir, fname))
-    try:
-        float_rmsd = get_rmsd(ref_st, af_st)
-    except Exception as e:
-        print(f"Skipping: {e}")
-        continue
-    print(float_rmsd)
-    rmsd_dict[pdb_id].append(float_rmsd)
 
-import pdb;pdb.set_trace()
+
+def main():
+    parser = argparse.ArgumentParser(description='Connect the ends of a pepride chain')
+    parser.add_argument('input_dir',
+                        type=str,
+                        help='Colabfold output dir to get raw peptide structure from')
+    args = parser.parse_args()
+
+    rmsd_dict = defaultdict(list)
+    raw_results_dir = args.input_dir
+    for fname in os.listdir(raw_results_dir):
+        if not fname.endswith('.pdb'):
+            continue
+        print(fname)
+        pdb_id = fname.split('_unrelaxed')[0]
+        ref_st = get_pdb_st(pdb_id)
+        af_st = structure.StructureReader.read(os.path.join(raw_results_dir, fname))
+        try:
+            float_rmsd = get_rmsd(ref_st, af_st)
+        except Exception as e:
+            print(f"Skipping: {e}")
+            continue
+        print(float_rmsd)
+        rmsd_dict[pdb_id].append(float_rmsd)
+
+    import pdb;pdb.set_trace()
+    
+if __name__ == "__main__":
+    main()
+
