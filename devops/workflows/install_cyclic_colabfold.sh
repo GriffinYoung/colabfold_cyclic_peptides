@@ -1,5 +1,5 @@
 export COLABFOLDDIR="localcolabfold"
-
+mkdir -p $COLABFOLDDIR
 # Try copying existing environment
 gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_environment $COLABFOLDDIR
 if ! [ -d $COLABFOLDDIR ]; then
