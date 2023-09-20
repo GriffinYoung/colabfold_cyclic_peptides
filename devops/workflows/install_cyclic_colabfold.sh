@@ -1,7 +1,7 @@
 export COLABFOLDDIR="localcolabfold"
 mkdir -p $COLABFOLDDIR
 # Try copying existing environment
-gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_environment $COLABFOLDDIR
+gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_environment/* $COLABFOLDDIR
 if ! [ -d $COLABFOLDDIR ]; then
     # Install colabfold
     apt-get update && apt-get -y install curl wget git
