@@ -9,6 +9,7 @@ from collections import defaultdict
 from typing import List, Optional
 from Bio.PDB import PDBList
 import subprocess
+import argparse
 
 def run_bash(args):
     print(" ".join([str(arg) for arg in args]))
