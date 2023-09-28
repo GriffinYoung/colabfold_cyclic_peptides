@@ -60,7 +60,7 @@ def main():
                         type=str,
                         help='Directory to save results in')
     
-    options = prepwizard.PrepWizardSettings()
+    options = prepwizard.PrepWizardSettings(treat_disulfides=True)
     args = parser.parse_args()
     for fname in os.listdir(args.input_dir):
         if not fname.endswith('.pdb'):
