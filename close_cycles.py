@@ -5,7 +5,6 @@ from schrodinger.protein.rotamers import Rotamers
 import os
 import argparse
 
-
 MAX_PEPTIDE_BOND_LENGTH = 1.5
 MAX_DISULFIDE_BOND_LENGTH = 3.0
 
@@ -29,11 +28,14 @@ def optimize_disulfide_rotamers(st, cys1, cys2):
                 best_rotamer_pair = (r1, r2)
 
     if best_rotamer_pair is None:
-        raise ValueError(f'Could not find disulfide bond between {cys1} and {cys2}, shortest distance {best_dist}')
+        raise ValueError(
+            f'Could not find disulfide bond between {cys1} and {cys2}, shortest distance {best_dist}'
+        )
     best_rotamer_pair[0].apply()
     best_rotamer_pair[1].apply()
     s1.addBond(s2, 1)
-    
+
+
 def close_cycle(st: Structure):
     binder = list(st.chain)[0]
     n_term = list(binder.residue)[0]
@@ -46,26 +48,33 @@ def close_cycle(st: Structure):
         n_nitrogen = n_term.getBackboneNitrogen()
         peptide_bond_length = measure_distance(c_carbon, n_nitrogen)
         if peptide_bond_length > MAX_PEPTIDE_BOND_LENGTH:
-            raise ValueError(f'Peptide bond of length {peptide_bond_length} is too long to close.')
+            raise ValueError(
+                f'Peptide bond of length {peptide_bond_length} is too long to close.'
+            )
         c_carbon.addBond(n_nitrogen, 1)
     return st
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Connect the ends of a pepride chain')
-    parser.add_argument('input_dir',
-                        type=str,
-                        help='Colabfold output dir to get raw peptide structure from')
+    parser = argparse.ArgumentParser(
+        description='Connect the ends of a pepride chain')
+    parser.add_argument(
+        'input_dir',
+        type=str,
+        help='Colabfold output dir to get raw peptide structure from')
     parser.add_argument('out_dir',
                         type=str,
                         help='Directory to save results in')
-    
+    parser.add_argument('--subdirs',
+                        action='store_true',
+                        help='Save results in subdirs named after the input. Will collect multiple folds of the same sequence.')
+
     options = prepwizard.PrepWizardSettings(treat_disulfides=True)
     args = parser.parse_args()
     for fname in os.listdir(args.input_dir):
         if not fname.endswith('.pdb'):
             continue
-        header = fname.split('_unrelaxed')[0]
+
         structure_file = os.path.join(args.input_dir, fname)
         st = StructureReader.read(structure_file)
         try:
@@ -77,10 +86,17 @@ def main():
             st = prepwizard.prepare_structure(st, options)[0]
         except:
             print(f'{fname} protein prep failed')
-        jobdir = os.path.join(args.out_dir, header)
-        os.makedirs(jobdir, exist_ok=True)
-        prepped_out_file = fname.split('.')[0] + '_closed_prepped.mae'
-        st.write(os.path.join(jobdir, prepped_out_file))
-    
+        
+        outfile = os.path.basename(fname) + '_closed_prepped.mae'
+        jobdir = args.out_dir
+        if args.subdirs:
+            # Only works for colabfold output
+            header = fname.split('_unrelaxed')[0]
+            jobdir = os.path.join(args.out_dir, header)
+            os.makedirs(jobdir, exist_ok=True)
+        outpath = os.path.join(jobdir, outfile)
+        st.write(outpath)
+
+
 if __name__ == "__main__":
     main()
