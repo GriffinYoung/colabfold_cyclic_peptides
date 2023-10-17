@@ -123,7 +123,7 @@ def main():
                     fixbb(pdb_filename, chain, out_fname)
 
         if args.backbone_structures is not None:
-            for st in StructureReader.read(args.backbone_structures):
+            for st in list(StructureReader.read(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = next(st.residue).chain
