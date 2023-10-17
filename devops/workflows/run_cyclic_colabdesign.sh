@@ -38,6 +38,7 @@ fi
 
 mkdir -p results
 python close_cycles.py raw_results results
+cp raw_results/*.sequence results
 
 tar -czvf raw_results.tgz raw_results
 tar -czvf results.tgz results
