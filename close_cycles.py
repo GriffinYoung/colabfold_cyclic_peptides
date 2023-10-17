@@ -90,7 +90,7 @@ def main():
         except:
             print(f'{fname} protein prep failed')
 
-        outfile = os.path.basename(fname) + '_closed_prepped.mae'
+        outfile = os.path.splitext(fname)[0] + '_closed_prepped.mae'
         jobdir = args.out_dir
         if args.subdirs:
             # Only works for colabfold output

@@ -103,16 +103,18 @@ def main():
     parser.add_argument(
         '--backbone_structures',
         type=str,
+        default=None,
         help='File containing backbone structures to use for fixbb protocol')
     parser.add_argument(
         '--backbone_chains',
+        default=None,
         type=str,
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
 
     args = parser.parse_args()
 
     if args.protocol == 'fixbb':
-        if os.path.exists(args.backbone_chains):
+        if args.backbone_chains:
             with open(args.backbone_chains) as f:
                 for line in f.readlines():
                     pdb_id, chain = line.strip().split('_')
@@ -120,12 +122,13 @@ def main():
                     out_fname = f'{args.out_dir}/{pdb_id}_{chain}.pdb'
                     fixbb(pdb_filename, chain, out_fname)
 
-        for st in StructureReader.read(args.backbone_structures):
-            pdb_filename = f'{st.title}.pdb'
-            st.write(pdb_filename)
-            chain = next(st.residue).chain
-            out_fname = f'{args.out_dir}/{st.title}_{st.chain}.pdb'
-            fixbb(pdb_filename, chain, out_fname)
+        if args.backbone_structures:
+            for st in StructureReader.read(args.backbone_structures):
+                pdb_filename = f'{st.title}.pdb'
+                st.write(pdb_filename)
+                chain = next(st.residue).chain
+                out_fname = f'{args.out_dir}/{st.title}_{st.chain}.pdb'
+                fixbb(pdb_filename, chain, out_fname)
     elif args.protocol == 'hallucination':
         hallucination(args.hallucination_length)
 
