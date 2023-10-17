@@ -136,7 +136,7 @@ def main():
                                                 f'{st.title}_{st.chain}')
                 fixbb(pdb_filename, chain, out_fname_prefix)
     elif args.protocol == 'hallucination':
-        out_fname_prefix = f'{args.out_dir}/hallucination_{args.hallucination_length}'
+        out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
         hallucination(args.hallucination_length, out_fname_prefix)
 
 
