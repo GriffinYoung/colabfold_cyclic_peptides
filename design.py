@@ -77,11 +77,12 @@ def hallucination(length, out_fname_prefix):
                      seqsep=0)
     af_model.set_weights(pae=1, plddt=1, con=0.5)
     af_model.design_soft(50)
-
+    print("Finished design soft")
     # three stage design
     af_model.set_seq(seq=af_model.aux["seq"]["pseudo"])
     af_model.design_3stage(50, 50, 10)
 
+    print("Saving halluciantion...")
     af_model.save_pdb(out_fname_prefix + ".pdb")
 
     best_seq = af_model.get_seqs()
