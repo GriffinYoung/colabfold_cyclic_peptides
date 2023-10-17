@@ -15,7 +15,25 @@ if ! [ -d params ]; then
 fi
 
 mkdir -p raw_results
-python design.py $protocol raw_results --hallucination_length $hallucination_length --backbone_structures backbone_structures.maegz --backbone_chains backbone_chains.txt
+if [[ "$protocol" == "fixbb" ]]; then
+    echo "Running fixbb protocol"
+    if [[ -e "backbone_structures.maegz" ]]; then
+        echo "Using backbone structures"
+        python design.py $protocol raw_results --backbone_structures backbone_structures.maegz
+    fi
+
+    if [[ -e "backbone_chains.txt" ]]; then
+        echo "Using backbone chains"
+        python design.py $protocol raw_results --backbone_chains backbone_chains.txt
+    fi
+else
+    echo "Running hallucination protocol"
+    if [[ -z "$hallucination_length" ]]; then
+        echo "No hallucination length specified, skipping hallucination"
+    else
+        python design.py hallucination raw_results --backbone_chains backbone_chains.txt
+    fi
+fi
 
 mkdir -p results
 python close_cycles.py raw_results results
