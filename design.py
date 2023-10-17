@@ -114,7 +114,7 @@ def main():
     args = parser.parse_args()
 
     if args.protocol == 'fixbb':
-        if args.backbone_chains:
+        if args.backbone_chains is not None:
             with open(args.backbone_chains) as f:
                 for line in f.readlines():
                     pdb_id, chain = line.strip().split('_')
@@ -122,7 +122,7 @@ def main():
                     out_fname = f'{args.out_dir}/{pdb_id}_{chain}.pdb'
                     fixbb(pdb_filename, chain, out_fname)
 
-        if args.backbone_structures:
+        if args.backbone_structures is not None:
             for st in StructureReader.read(args.backbone_structures):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
