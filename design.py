@@ -1,16 +1,16 @@
 import argparse
 import os
-from schrodinger.structure import StructureReader
-from colabdesign import mk_afdesign_model, clear_mem
-import numpy as np
+# from schrodinger.structure import StructureReader
+# from colabdesign import mk_afdesign_model, clear_mem
+# import numpy as np
 
-import jax
-import jax.numpy as jnp
-from colabdesign.af.alphafold.common import residue_constants
+# import jax
+# import jax.numpy as jnp
+# from colabdesign.af.alphafold.common import residue_constants
 
-import requests
+# import requests
 
-import util
+# import util
 
 
 def download_pdb(pdb_id):
@@ -86,6 +86,13 @@ def hallucination(length):
     af_model.get_seqs()
 
 
+class OptionalAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values is None:
+            setattr(namespace, self.dest, None)  # Set your default value here
+        else:
+            setattr(namespace, self.dest, values)
+
 def main():
     parser = argparse.ArgumentParser(description='Design a cyclic peptide.')
     # Optional arguments
@@ -100,17 +107,17 @@ def main():
     parser.add_argument(
         '--hallucination_length',
         type=int,
-        default=10,
+        action=OptionalAction,
         help='Length of the cyclic peptide to use for hallucination protocol')
     parser.add_argument(
         '--backbone_structures',
         type=str,
-        default=None,
+        action=OptionalAction,
         help='File containing backbone structures to use for fixbb protocol')
     parser.add_argument(
         '--backbone_chains',
         type=str,
-        default=None,
+        action=OptionalAction,
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
 
     args = parser.parse_args()
