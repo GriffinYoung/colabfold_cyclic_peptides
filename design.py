@@ -89,7 +89,6 @@ def hallucination(length, out_fname_prefix):
         f.write(best_seq)
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Design a cyclic peptide.')
     # Optional arguments
@@ -124,7 +123,8 @@ def main():
                 for line in f.readlines():
                     pdb_id, chain = line.strip().split('_')
                     pdb_filename = download_pdb(pdb_id)
-                    out_fname_prefix = f'{args.out_dir}/{pdb_id}_{chain}'
+                    out_fname_prefix = os.path.join(args.out_dir,
+                                                    f'{pdb_id}_{chain}')
                     fixbb(pdb_filename, chain, out_fname_prefix)
 
         if args.backbone_structures is not None:
@@ -132,11 +132,13 @@ def main():
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = next(st.residue).chain
-                out_fname_prefix = f'{args.out_dir}/{st.title}_{st.chain}'
+                out_fname_prefix = os.path.join(args.out_dir,
+                                                f'{st.title}_{st.chain}')
                 fixbb(pdb_filename, chain, out_fname_prefix)
     elif args.protocol == 'hallucination':
         out_fname_prefix = f'{args.out_dir}/hallucination_{args.hallucination_length}'
         hallucination(args.hallucination_length, out_fname_prefix)
+
 
 if __name__ == "__main__":
     main()
