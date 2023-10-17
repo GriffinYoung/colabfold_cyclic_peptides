@@ -1,16 +1,16 @@
 import argparse
 import os
-# from schrodinger.structure import StructureReader
-# from colabdesign import mk_afdesign_model, clear_mem
-# import numpy as np
+from schrodinger.structure import StructureReader
+from colabdesign import mk_afdesign_model, clear_mem
+import numpy as np
 
-# import jax
-# import jax.numpy as jnp
-# from colabdesign.af.alphafold.common import residue_constants
+import jax
+import jax.numpy as jnp
+from colabdesign.af.alphafold.common import residue_constants
 
-# import requests
+import requests
 
-# import util
+import util
 
 
 def download_pdb(pdb_id):

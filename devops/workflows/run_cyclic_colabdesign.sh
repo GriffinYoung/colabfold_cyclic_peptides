@@ -31,6 +31,7 @@ else
     if [[ -z "$hallucination_length" ]]; then
         echo "No hallucination length specified, skipping hallucination"
     else
+        echo "Hallucinating $hallucination_length residues"
         python design.py hallucination raw_results --backbone_chains backbone_chains.txt
     fi
 fi
