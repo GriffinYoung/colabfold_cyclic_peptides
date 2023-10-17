@@ -1,14 +1,9 @@
 from schrodinger import structure
-from schrodinger.structutils import rmsd
 from schrodinger.structutils.rmsd import cealign
-
-from schrodinger.structutils import structalign
 
 import os
 from collections import defaultdict
-from typing import List, Optional
 from Bio.PDB import PDBList
-import subprocess
 import argparse
 import matplotlib.pyplot as plt
 

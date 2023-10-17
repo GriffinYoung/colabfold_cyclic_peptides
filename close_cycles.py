@@ -65,9 +65,12 @@ def main():
     parser.add_argument('out_dir',
                         type=str,
                         help='Directory to save results in')
-    parser.add_argument('--subdirs',
-                        action='store_true',
-                        help='Save results in subdirs named after the input. Will collect multiple folds of the same sequence.')
+    parser.add_argument(
+        '--subdirs',
+        action='store_true',
+        help=
+        'Save results in subdirs named after the input. Will collect multiple folds of the same sequence.'
+    )
 
     options = prepwizard.PrepWizardSettings(treat_disulfides=True)
     args = parser.parse_args()
@@ -86,7 +89,7 @@ def main():
             st = prepwizard.prepare_structure(st, options)[0]
         except:
             print(f'{fname} protein prep failed')
-        
+
         outfile = os.path.basename(fname) + '_closed_prepped.mae'
         jobdir = args.out_dir
         if args.subdirs:

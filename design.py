@@ -2,7 +2,6 @@ import argparse
 import os
 from schrodinger.structure import StructureReader
 from colabdesign import mk_afdesign_model, clear_mem
-import numpy as np
 
 import jax
 import jax.numpy as jnp
@@ -94,8 +93,8 @@ def main():
                         type=str,
                         help='Design protocol to use')
     parser.add_argument('out_dir',
-                    type=str,
-                    help='Directory to save results in')
+                        type=str,
+                        help='Directory to save results in')
 
     parser.add_argument(
         '--hallucination_length',
@@ -114,13 +113,13 @@ def main():
 
     if args.protocol == 'fixbb':
         if os.path.exists(args.backbone_chains):
-          with open(args.backbone_chains) as f:
-              for line in f.readlines():
-                  pdb_id, chain = line.strip().split('_')
-                  pdb_filename = download_pdb(pdb_id)
-                  out_fname = f'{args.out_dir}/{pdb_id}_{chain}.pdb'
-                  fixbb(pdb_filename, chain, out_fname)
-        
+            with open(args.backbone_chains) as f:
+                for line in f.readlines():
+                    pdb_id, chain = line.strip().split('_')
+                    pdb_filename = download_pdb(pdb_id)
+                    out_fname = f'{args.out_dir}/{pdb_id}_{chain}.pdb'
+                    fixbb(pdb_filename, chain, out_fname)
+
         for st in StructureReader.read(args.backbone_structures):
             pdb_filename = f'{st.title}.pdb'
             st.write(pdb_filename)

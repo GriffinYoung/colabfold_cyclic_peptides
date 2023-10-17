@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def add_cyclic_offset(self, bug_fix=True):
     '''add cyclic offset to connect N and C term'''
 
