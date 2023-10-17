@@ -54,7 +54,7 @@ def fixbb(pdb_filename, chain, out_fname_prefix):
 
     af_model.save_pdb(out_fname_prefix + ".pdb")
 
-    best_seq = af_model.get_seqs()
+    best_seq = af_model.get_seqs()[0]
     with open(out_fname_prefix + ".sequence", "w") as f:
         f.write(best_seq)
 
@@ -85,7 +85,7 @@ def hallucination(length, out_fname_prefix):
     print("Saving halluciantion...")
     af_model.save_pdb(out_fname_prefix + ".pdb")
 
-    best_seq = af_model.get_seqs()
+    best_seq = af_model.get_seqs()[0]
     with open(out_fname_prefix + ".sequence", "w") as f:
         f.write(best_seq)
 
