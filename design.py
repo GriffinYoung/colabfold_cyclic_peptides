@@ -132,9 +132,9 @@ def main():
             for st in list(StructureReader(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
-                chain = list(st.residue)[0].chain
+                chain = list(st.chain)[0].name
                 out_fname_prefix = os.path.join(args.out_dir,
-                                                f'{st.title}_{st.chain}')
+                                                f'{st.title}_{chain}')
                 fixbb(pdb_filename, chain, out_fname_prefix)
     elif args.protocol == 'hallucination':
         out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
