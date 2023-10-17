@@ -132,7 +132,7 @@ def main():
             for st in list(StructureReader(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
-                chain = next(st.residue).chain
+                chain = list(st.residue)[0].chain
                 out_fname_prefix = os.path.join(args.out_dir,
                                                 f'{st.title}_{st.chain}')
                 fixbb(pdb_filename, chain, out_fname_prefix)
