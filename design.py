@@ -42,7 +42,7 @@ def add_rg_loss(self, weight=0.1):
     self.opt["weights"]["rg"] = weight
 
 
-def fixbb(pdb_filename, chain, out_fname):
+def fixbb(pdb_filename, chain, out_fname_prefix):
     # Fixed backbone
     clear_mem()
     af_model = mk_afdesign_model(protocol="fixbb")
@@ -52,12 +52,14 @@ def fixbb(pdb_filename, chain, out_fname):
     af_model.restart()
     af_model.design_3stage()
 
-    af_model.save_pdb(out_fname)
+    af_model.save_pdb(out_fname_prefix + ".pdb")
 
-    af_model.get_seqs()
+    best_seq = af_model.get_seqs()
+    with open(out_fname_prefix + ".sequence", "w") as f:
+        f.write(best_seq)
 
 
-def hallucination(length):
+def hallucination(length, out_fname_prefix):
     # Hallucination
     clear_mem()
     af_model = mk_afdesign_model(protocol="hallucination")
@@ -80,9 +82,12 @@ def hallucination(length):
     af_model.set_seq(seq=af_model.aux["seq"]["pseudo"])
     af_model.design_3stage(50, 50, 10)
 
-    af_model.save_pdb(f"{af_model.protocol}_{length}.pdb")
+    af_model.save_pdb(out_fname_prefix + ".pdb")
 
-    af_model.get_seqs()
+    best_seq = af_model.get_seqs()
+    with open(out_fname_prefix + ".sequence", "w") as f:
+        f.write(best_seq)
+
 
 
 def main():
@@ -119,19 +124,19 @@ def main():
                 for line in f.readlines():
                     pdb_id, chain = line.strip().split('_')
                     pdb_filename = download_pdb(pdb_id)
-                    out_fname = f'{args.out_dir}/{pdb_id}_{chain}.pdb'
-                    fixbb(pdb_filename, chain, out_fname)
+                    out_fname_prefix = f'{args.out_dir}/{pdb_id}_{chain}'
+                    fixbb(pdb_filename, chain, out_fname_prefix)
 
         if args.backbone_structures is not None:
             for st in list(StructureReader.read(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = next(st.residue).chain
-                out_fname = f'{args.out_dir}/{st.title}_{st.chain}.pdb'
-                fixbb(pdb_filename, chain, out_fname)
+                out_fname_prefix = f'{args.out_dir}/{st.title}_{st.chain}'
+                fixbb(pdb_filename, chain, out_fname_prefix)
     elif args.protocol == 'hallucination':
-        hallucination(args.hallucination_length)
-
+        out_fname_prefix = f'{args.out_dir}/hallucination_{args.hallucination_length}'
+        hallucination(args.hallucination_length, out_fname_prefix)
 
 if __name__ == "__main__":
     main()
