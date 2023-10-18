@@ -72,7 +72,7 @@ def main():
         'Save results in subdirs named after the input. Will collect multiple folds of the same sequence.'
     )
 
-    options = prepwizard.PrepWizardSettings(treat_disulfides=True)
+    options = prepwizard.PrepWizardSettings(treat_disulfides=True, skip_assigned_residues=False)
     args = parser.parse_args()
     for fname in os.listdir(args.input_dir):
         if not fname.endswith('.pdb'):
