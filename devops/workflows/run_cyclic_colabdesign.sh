@@ -18,21 +18,21 @@ mkdir -p raw_results
 if [[ "$protocol" == "fixbb" ]]; then
     echo "Running fixbb protocol"
     if [[ -e "backbone_structures.maegz" ]]; then
-        echo "Using backbone structures"
-        python design.py $protocol raw_results --backbone_structures backbone_structures.maegz
+        echo "Using backbone structures to design $num_designs designs"
+        python design.py $protocol raw_results --backbone_structures backbone_structures.maegz --num_designs $num_designs
     fi
 
     if [[ -e "backbone_chains.txt" ]]; then
-        echo "Using backbone chains"
-        python design.py $protocol raw_results --backbone_chains backbone_chains.txt
+        echo "Using backbone chains to design $num_designs designs"
+        python design.py $protocol raw_results --backbone_chains backbone_chains.txt --num_designs $num_designs
     fi
 else
     echo "Running hallucination protocol"
     if [[ -z "$hallucination_length" ]]; then
         echo "No hallucination length specified, skipping hallucination"
     else
-        echo "Hallucinating $hallucination_length residues"
-        python design.py hallucination raw_results --hallucination_length $hallucination_length
+        echo "Hallucinating $num_designs $hallucination_length residues"
+        python design.py hallucination raw_results --hallucination_length $hallucination_length --num_designs $num_designs
     fi
 fi
 

@@ -42,14 +42,14 @@ def add_rg_loss(self, weight=0.1):
     self.opt["weights"]["rg"] = weight
 
 
-def fixbb(pdb_filename, chain, out_fname_prefix):
+def fixbb(pdb_filename, chain, out_fname_prefix, seed=0):
     # Fixed backbone
     clear_mem()
     af_model = mk_afdesign_model(protocol="fixbb")
     af_model.prep_inputs(pdb_filename=pdb_filename, chain=chain)
     util.add_cyclic_offset(af_model)
 
-    af_model.restart()
+    af_model.restart(seed=seed)
     af_model.design_3stage()
 
     af_model.save_pdb(out_fname_prefix + ".pdb")
@@ -59,7 +59,7 @@ def fixbb(pdb_filename, chain, out_fname_prefix):
         f.write(best_seq)
 
 
-def hallucination(length, out_fname_prefix):
+def hallucination(length, out_fname_prefix, seed=0):
     # Hallucination
     clear_mem()
     af_model = mk_afdesign_model(protocol="hallucination")
@@ -68,7 +68,7 @@ def hallucination(length, out_fname_prefix):
     # add_rg_loss(af_model)
 
     # pre-design with gumbel initialization and softmax activation
-    af_model.restart()
+    af_model.restart(seed=seed)
     af_model.set_seq(mode="gumbel")
     af_model.set_opt("con",
                      binary=True,
@@ -115,30 +115,41 @@ def main():
         default=None,
         type=str,
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
+    
+    parser.add_argument(
+        '--num_designs',
+        default=1,
+        type=int,
+        help='Number of designs to generate'
+    )
 
     args = parser.parse_args()
 
     if args.protocol == 'fixbb':
         if args.backbone_chains is not None:
             with open(args.backbone_chains) as f:
-                for line in f.readlines():
-                    pdb_id, chain = line.strip().split('_')
-                    pdb_filename = download_pdb(pdb_id)
+                pdb_chain_tuples = [line.strip().split('_') for line in f.readlines()]
+            for pdb_id, chain in pdb_chain_tuples:
+                pdb_filename = download_pdb(pdb_id)
+                for i in range(args.num_designs):
                     out_fname_prefix = os.path.join(args.out_dir,
-                                                    f'{pdb_id}_{chain}')
-                    fixbb(pdb_filename, chain, out_fname_prefix)
+                                                    f'{pdb_id}_{chain}_{i}')
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
 
         if args.backbone_structures is not None:
             for st in list(StructureReader(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = list(st.chain)[0].name
-                out_fname_prefix = os.path.join(args.out_dir,
-                                                f'{st.title}_{chain}')
-                fixbb(pdb_filename, chain, out_fname_prefix)
+                for i in range(args.num_designs):
+                    out_fname_prefix = os.path.join(args.out_dir,
+                                                    f'{st.title}_{chain}_{i}')
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
+
     elif args.protocol == 'hallucination':
-        out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
-        hallucination(args.hallucination_length, out_fname_prefix)
+        for i in range(args.num_designs):
+            out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}_{i}')
+            hallucination(args.hallucination_length, out_fname_prefix, seed=i)
 
 
 if __name__ == "__main__":
