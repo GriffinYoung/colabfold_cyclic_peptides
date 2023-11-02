@@ -41,6 +41,7 @@ def add_rg_loss(self, weight=0.1):
     self._callbacks["model"]["loss"].append(loss_fn)
     self.opt["weights"]["rg"] = weight
 
+
 def save_outputs(af_model, out_fname_prefix, seed):
     print("Saving halluciantion...")
     temp_pdb = out_fname_prefix + ".pdb"
@@ -48,12 +49,12 @@ def save_outputs(af_model, out_fname_prefix, seed):
     sts = list(StructureReader(temp_pdb))
     os.remove(temp_pdb)
 
+    seed_prefix = f"{out_fname_prefix}_{seed}"
     for i, st in enumerate(sts):
         design_prefix = f"{seed_prefix}_{i}"
         st.title = design_prefix
         st.write(f"{design_prefix}.pdb")
 
-    seed_prefix = f"{out_fname_prefix}_{seed}"
     best_seq = af_model.get_seqs()[0]  # I think this list has only one element
     with open(f"{seed_prefix}.sequence", "w") as f:
         f.write(f"{best_seq}")
@@ -78,6 +79,7 @@ def fixbb(pdb_filename, chain, out_fname_prefix, seed=0):
     af_model.design_3stage()
 
     save_outputs(af_model, out_fname_prefix, seed)
+
 
 def hallucination(length, out_fname_prefix, seed=0):
     """Produces 5 designs, each saved as a PDB and a sequence file
@@ -111,9 +113,6 @@ def hallucination(length, out_fname_prefix, seed=0):
     af_model.design_3stage(50, 50, 10)
 
     save_outputs(af_model, out_fname_prefix, seed)
-
-
-
 
 
 def main():
