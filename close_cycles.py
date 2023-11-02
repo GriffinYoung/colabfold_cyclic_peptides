@@ -93,8 +93,7 @@ def main():
         outfile = os.path.splitext(fname)[0] + '_closed_prepped.mae'
         jobdir = args.out_dir
         if args.subdirs:
-            # Only works for colabfold output
-            header = fname.split('_unrelaxed')[0]
+            header = fname.rsplit('_', 1)[0] # Split on last underscore, get everything before
             jobdir = os.path.join(args.out_dir, header)
             os.makedirs(jobdir, exist_ok=True)
         outpath = os.path.join(jobdir, outfile)

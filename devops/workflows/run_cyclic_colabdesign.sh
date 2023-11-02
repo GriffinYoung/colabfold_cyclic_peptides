@@ -37,7 +37,7 @@ else
 fi
 
 mkdir -p results
-python close_cycles.py raw_results results
+python close_cycles.py raw_results results --subdirs
 cp raw_results/*.sequence results
 
 tar -czvf raw_results.tgz raw_results
