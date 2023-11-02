@@ -104,6 +104,8 @@ def hallucination(length, out_fname_prefix, seed=0):
     sts = list(StructureReader(temp_pdb))
 
     best_seqs = af_model.get_seqs()
+    print(f"Number of best_seqs: {len(best_seqs)}")
+    print(f"Number of sts: {len(sts)}")
     for i, (st, best_seq) in enumerate(zip(sts, best_seqs)):
         design_prefix = f"{out_fname_prefix}_{seed+i}"
         st.title = design_prefix
