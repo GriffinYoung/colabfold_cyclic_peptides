@@ -102,13 +102,15 @@ def hallucination(length, out_fname_prefix, seed=0):
     temp_pdb = out_fname_prefix + ".pdb"
     af_model.save_pdb(temp_pdb)
     sts = list(StructureReader(temp_pdb))
+    os.remove(temp_pdb)
 
-    best_seq = af_model.get_seqs()[0] # I think this list has only one element
-    with open(f"{design_prefix}.sequence", "w") as f:
+    seed_prefix = f"{out_fname_prefix}_{seed}"
+    best_seq = af_model.get_seqs()[0]  # I think this list has only one element
+    with open(f"{seed_prefix}.sequence", "w") as f:
         f.write(f"{best_seq}")
 
     for i, st in enumerate(sts):
-        design_prefix = f"{out_fname_prefix}_{seed}_{i}"
+        design_prefix = f"{seed_prefix}_{i}"
         st.title = design_prefix
         st.write(f"{design_prefix}.pdb")
 
@@ -138,20 +140,20 @@ def main():
         default=None,
         type=str,
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
-    
-    parser.add_argument(
-        '--num_seqs',
-        default=1,
-        type=int,
-        help='Number of designs to generate'
-    )
+
+    parser.add_argument('--num_seqs',
+                        default=1,
+                        type=int,
+                        help='Number of designs to generate')
 
     args = parser.parse_args()
 
     if args.protocol == 'fixbb':
         if args.backbone_chains is not None:
             with open(args.backbone_chains) as f:
-                pdb_chain_tuples = [line.strip().split('_') for line in f.readlines()]
+                pdb_chain_tuples = [
+                    line.strip().split('_') for line in f.readlines()
+                ]
             for pdb_id, chain in pdb_chain_tuples:
                 pdb_filename = download_pdb(pdb_id)
                 for i in range(args.num_seqs):
@@ -171,7 +173,8 @@ def main():
 
     elif args.protocol == 'hallucination':
         for i in range(args.num_seqs):
-            out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
+            out_fname_prefix = os.path.join(
+                args.out_dir, f'hallucination_{args.hallucination_length}')
             hallucination(args.hallucination_length, out_fname_prefix, seed=i)
 
 

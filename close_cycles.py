@@ -72,7 +72,8 @@ def main():
         'Save results in subdirs named after the input. Will collect multiple folds of the same sequence.'
     )
 
-    options = prepwizard.PrepWizardSettings(treat_disulfides=True, skip_assigned_residues=False)
+    options = prepwizard.PrepWizardSettings(treat_disulfides=True,
+                                            skip_assigned_residues=False)
     args = parser.parse_args()
     for fname in os.listdir(args.input_dir):
         if not fname.endswith('.pdb'):
@@ -93,7 +94,8 @@ def main():
         outfile = os.path.splitext(fname)[0] + '_closed_prepped.mae'
         jobdir = args.out_dir
         if args.subdirs:
-            header = fname.rsplit('_', 1)[0] # Split on last underscore, get everything before
+            header = fname.rsplit(
+                '_', 1)[0]  # Split on last underscore, get everything before
             jobdir = os.path.join(args.out_dir, header)
             os.makedirs(jobdir, exist_ok=True)
         outpath = os.path.join(jobdir, outfile)
