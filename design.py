@@ -108,7 +108,7 @@ def hallucination(length, out_fname_prefix, seed=0):
         f.write(f"{best_seq}")
 
     for i, st in enumerate(sts):
-        design_prefix = f"{out_fname_prefix}_{seed+i}"
+        design_prefix = f"{out_fname_prefix}_{seed}_{i}"
         st.title = design_prefix
         st.write(f"{design_prefix}.pdb")
 
@@ -140,7 +140,7 @@ def main():
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
     
     parser.add_argument(
-        '--num_seqss',
+        '--num_seqs',
         default=1,
         type=int,
         help='Number of designs to generate'
@@ -154,25 +154,25 @@ def main():
                 pdb_chain_tuples = [line.strip().split('_') for line in f.readlines()]
             for pdb_id, chain in pdb_chain_tuples:
                 pdb_filename = download_pdb(pdb_id)
-                for i in range(args.num_seqss):
+                for i in range(args.num_seqs):
                     out_fname_prefix = os.path.join(args.out_dir,
                                                     f'{pdb_id}_{chain}')
-                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i*5) # *5 since each run produces 5 designs
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
 
         if args.backbone_structures is not None:
             for st in list(StructureReader(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = list(st.chain)[0].name
-                for i in range(args.num_seqss):
+                for i in range(args.num_seqs):
                     out_fname_prefix = os.path.join(args.out_dir,
                                                     f'{st.title}_{chain}')
-                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i*5)
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
 
     elif args.protocol == 'hallucination':
-        for i in range(args.num_seqss):
+        for i in range(args.num_seqs):
             out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
-            hallucination(args.hallucination_length, out_fname_prefix, seed=i*5)
+            hallucination(args.hallucination_length, out_fname_prefix, seed=i)
 
 
 if __name__ == "__main__":
