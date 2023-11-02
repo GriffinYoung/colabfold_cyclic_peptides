@@ -51,6 +51,7 @@ def close_cycle(st: Structure):
             raise ValueError(
                 f'Peptide bond of length {peptide_bond_length} is too long to close.'
             )
+        # Make bond
         c_carbon.addBond(n_nitrogen, 1)
     return st
 
