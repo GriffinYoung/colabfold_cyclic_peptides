@@ -101,7 +101,7 @@ def hallucination(length, out_fname_prefix, seed=0):
     print("Saving halluciantion...")
     temp_pdb = out_fname_prefix + ".pdb"
     af_model.save_pdb(temp_pdb)
-    sts = StructureReader(temp_pdb)
+    sts = list(StructureReader(temp_pdb))
 
     best_seqs = af_model.get_seqs()
     for i, (st, best_seq) in enumerate(zip(sts, best_seqs)):
