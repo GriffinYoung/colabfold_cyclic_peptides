@@ -43,6 +43,14 @@ def add_rg_loss(self, weight=0.1):
 
 
 def fixbb(pdb_filename, chain, out_fname_prefix, seed=0):
+    """Produces 5 designs, each saved as a PDB and a sequence file
+    with the prefix out_fname_prefix_{seed + i} where i is the index
+    of the design in the list of 5 designs.
+
+    :param length: length of the cyclic peptide to design
+    :param out_fname_prefix: prefix of the output files
+    :param seed: random seed, defaults to 0
+    """
     # Fixed backbone
     clear_mem()
     af_model = mk_afdesign_model(protocol="fixbb")
@@ -60,6 +68,14 @@ def fixbb(pdb_filename, chain, out_fname_prefix, seed=0):
 
 
 def hallucination(length, out_fname_prefix, seed=0):
+    """Produces 5 designs, each saved as a PDB and a sequence file
+    with the prefix out_fname_prefix_{seed + i} where i is the index
+    of the design in the list of 5 designs.
+
+    :param length: length of the cyclic peptide to design
+    :param out_fname_prefix: prefix of the output files
+    :param seed: random seed, defaults to 0
+    """
     # Hallucination
     clear_mem()
     af_model = mk_afdesign_model(protocol="hallucination")
@@ -83,11 +99,17 @@ def hallucination(length, out_fname_prefix, seed=0):
     af_model.design_3stage(50, 50, 10)
 
     print("Saving halluciantion...")
-    af_model.save_pdb(out_fname_prefix + ".pdb")
+    temp_pdb = out_fname_prefix + ".pdb"
+    af_model.save_pdb(temp_pdb)
+    sts = StructureReader(temp_pdb)
 
-    best_seq = af_model.get_seqs()[0]
-    with open(out_fname_prefix + ".sequence", "w") as f:
-        f.write(best_seq)
+    best_seqs = af_model.get_seqs()
+    for i, (st, best_seq) in enumerate(zip(sts, best_seqs)):
+        design_prefix = f"{out_fname_prefix}_{seed+i}"
+        st.title = design_prefix
+        st.write(f"{design_prefix}.pdb")
+        with open(f"{design_prefix}.sequence", "w") as f:
+            f.write(f"{best_seq}")
 
 
 def main():
@@ -117,7 +139,7 @@ def main():
         help='File containing PDBID_CHAIN lines to use for fixbb protocol')
     
     parser.add_argument(
-        '--num_designs',
+        '--num_runs',
         default=1,
         type=int,
         help='Number of designs to generate'
@@ -131,25 +153,25 @@ def main():
                 pdb_chain_tuples = [line.strip().split('_') for line in f.readlines()]
             for pdb_id, chain in pdb_chain_tuples:
                 pdb_filename = download_pdb(pdb_id)
-                for i in range(args.num_designs):
+                for i in range(args.num_runs):
                     out_fname_prefix = os.path.join(args.out_dir,
-                                                    f'{pdb_id}_{chain}_{i}')
-                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
+                                                    f'{pdb_id}_{chain}')
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i*5) # *5 since each run produces 5 designs
 
         if args.backbone_structures is not None:
             for st in list(StructureReader(args.backbone_structures)):
                 pdb_filename = f'{st.title}.pdb'
                 st.write(pdb_filename)
                 chain = list(st.chain)[0].name
-                for i in range(args.num_designs):
+                for i in range(args.num_runs):
                     out_fname_prefix = os.path.join(args.out_dir,
-                                                    f'{st.title}_{chain}_{i}')
-                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i)
+                                                    f'{st.title}_{chain}')
+                    fixbb(pdb_filename, chain, out_fname_prefix, seed=i*5)
 
     elif args.protocol == 'hallucination':
-        for i in range(args.num_designs):
-            out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}_{i}')
-            hallucination(args.hallucination_length, out_fname_prefix, seed=i)
+        for i in range(args.num_runs):
+            out_fname_prefix = os.path.join(args.out_dir, f'hallucination_{args.hallucination_length}')
+            hallucination(args.hallucination_length, out_fname_prefix, seed=i*5)
 
 
 if __name__ == "__main__":
