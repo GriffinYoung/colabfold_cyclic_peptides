@@ -15,8 +15,8 @@ if ! [ -d params ]; then
 fi
 
 mkdir -p raw_results
-if [[ -e "backbone_structures.maegz" ]]; then
-    python design.py $protocol raw_results --num_seqs $num_seqs --design_params design_params --structure_file backbone_structures.maegz
+if [[ -e "structures.maegz" ]]; then
+    python design.py $protocol raw_results --num_seqs $num_seqs --design_params design_params --structure_file structures.maegz
 else
     python design.py $protocol raw_results --num_seqs $num_seqs --design_params design_params
 fi

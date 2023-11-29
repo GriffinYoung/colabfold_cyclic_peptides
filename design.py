@@ -64,7 +64,7 @@ def save_outputs(af_model, out_fname_prefix, seed):
         f.write(f"{best_seq}")
 
 
-def fixbb(pdb_filename:str, chain:str, out_fname_prefix:str, seed:int=0):
+def fixbb(pdb_filename: str, chain: str, out_fname_prefix: str, seed: int = 0):
     """Produces a sequence and 5 alternative folds,
     each saved as a pdb file.
 
@@ -87,7 +87,7 @@ def fixbb(pdb_filename:str, chain:str, out_fname_prefix:str, seed:int=0):
     save_outputs(af_model, out_fname_prefix, seed)
 
 
-def hallucination(length:int, out_fname_prefix:str, seed=0):
+def hallucination(length: int, out_fname_prefix: str, seed=0):
     """Produces a sequence and 5 alternative folds,
     each saved as a pdb file.
 
@@ -122,7 +122,14 @@ def hallucination(length:int, out_fname_prefix:str, seed=0):
     save_outputs(af_model, out_fname_prefix, seed)
 
 
-def binder(pdb_filename:str, chain_to_mimic:str, chain_to_bind:str, chain_to_bind_hotspot:str, binder_len:int, initial_sequence:str, out_fname_prefix:str, seed=0):
+def binder(pdb_filename: str,
+           chain_to_mimic: str,
+           chain_to_bind: str,
+           chain_to_bind_hotspot: str,
+           binder_len: int,
+           initial_sequence: str,
+           out_fname_prefix: str,
+           seed=0):
     """
 
     :param pdb_filename: name of the pdb file to use as a backbone
@@ -134,30 +141,34 @@ def binder(pdb_filename:str, chain_to_mimic:str, chain_to_bind:str, chain_to_bin
     """
     # Hallucination
     clear_mem()
-    af_model = mk_afdesign_model(protocol="binder",
-                                 use_multimer=True,
-                                 num_recycles=20,
-                                 recycle_mode="sample") # What is recycle_mode?
-    af_model.prep_inputs(pdb_filename=pdb_filename,
-                         chain=chain_to_bind,
-                         binder_len=binder_len, 
-                         binder_chain=chain_to_mimic,# What is binder_chain? I think it is the chain of the binder in the pdb file
-                         hotspot=chain_to_bind_hotspot,
-                         use_multimer=True,
-                         rm_target_seq=False) # What is rm_target_seq? "allow backbone of target structure to be flexible" what does that mean?
+    af_model = mk_afdesign_model(
+        protocol="binder",
+        use_multimer=True,
+        num_recycles=20,
+        recycle_mode="sample")  # What is recycle_mode?
+    af_model.prep_inputs(
+        pdb_filename=pdb_filename,
+        chain=chain_to_bind,
+        binder_len=binder_len,
+        binder_chain=
+        chain_to_mimic,  # What is binder_chain? I think it is the chain of the binder in the pdb file
+        hotspot=chain_to_bind_hotspot,
+        use_multimer=True,
+        rm_target_seq=False
+    )  # What is rm_target_seq? "allow backbone of target structure to be flexible" what does that mean?
 
     util.add_cyclic_offset(af_model)
 
     GD_method = 'adam'
     # add_rg_loss(af_model)
 
-    af_model.restart(seed=seed,
-                      seq=initial_sequence) # If binder_seq, pass that here and set binder_len to len(binder_seq) (must be all caps)
+    af_model.restart(
+        seed=seed, seq=initial_sequence
+    )  # If binder_seq, pass that here and set binder_len to len(binder_seq) (must be all caps)
     af_model.set_optimizer(optimizer=GD_method,
-                    learning_rate=0.1,
-                    norm_seq_grad=True) # What is norm_seq_grad?
-    
-    
+                           learning_rate=0.1,
+                           norm_seq_grad=True)  # What is norm_seq_grad?
+
     af_model.design_pssm_semigreeedy(120,
                                      32,
                                      num_recycles=20,
@@ -166,16 +177,29 @@ def binder(pdb_filename:str, chain_to_mimic:str, chain_to_bind:str, chain_to_bin
 
     save_outputs(af_model, out_fname_prefix, seed)
 
+
 # Declare designt tuple namedtuple
-Design = namedtuple('Design', ['protocol', 'structure_fname', 'structure_title', 'chain_to_mimic', 'chain_to_bind', 'chain_to_bind_hotspot', 'designed_sequence_len', 'initial_sequence'])
+Design = namedtuple('Design', [
+    'protocol', 'structure_fname', 'structure_title', 'chain_to_mimic',
+    'chain_to_bind', 'chain_to_bind_hotspot', 'designed_sequence_len',
+    'initial_sequence'
+])
+
+
 def create_design_tuples(args: argparse.Namespace) -> List[Design]:
     sts = []
     if args.structure_file is not None:
         sts = list(StructureReader(args.structure_file))
-    chain_df = pd.read_csv(args.design_params, header=None, columns=['pdb_id', 'st_title', 'chain_to_mimic', 'chain_to_bind', 'chain_to_bind_hotspot', 'designed_sequence_len', 'initial_sequence'])
+    chain_df = pd.read_csv(args.design_params,
+                           header=None,
+                           columns=[
+                               'pdb_id', 'st_title', 'chain_to_mimic',
+                               'chain_to_bind', 'chain_to_bind_hotspot',
+                               'designed_sequence_len', 'initial_sequence'
+                           ])
     design_tuples = []
     for pdb_id, st_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence in chain_df.values:
-        
+
         assert pdb_id is not None or st_title is not None
         structure_fname = None
         if pdb_id is not None:
@@ -185,11 +209,13 @@ def create_design_tuples(args: argparse.Namespace) -> List[Design]:
         if st_title is not None:
             sts_with_title = [st for st in sts if st.title == st_title]
             if len(sts_with_title) != 1:
-                raise ValueError(f'Expected 1 structure with title {st_title}, found {len(sts_with_title)}')
+                raise ValueError(
+                    f'Expected 1 structure with title {st_title}, found {len(sts_with_title)}'
+                )
             st = sts_with_title[0]
             structure_title = st_title
             structure_fname = f'{st_title}.pdb'
-            st.write(structure_fname) 
+            st.write(structure_fname)
         if chain_to_mimic is not None:
             chain_to_mimic = chain_to_mimic.upper()
             structure_title += f'_mimic_{chain_to_mimic}'
@@ -198,7 +224,7 @@ def create_design_tuples(args: argparse.Namespace) -> List[Design]:
             structure_title += f'_bind_{chain_to_bind}'
 
         if designed_sequence_len is not None:
-            designed_sequence_len = int(designed_sequence_len)        
+            designed_sequence_len = int(designed_sequence_len)
         if chain_to_bind_hotspot is not None:
             resiudes_pattern = re.compile(r'(\d+|\d+-\d+,)*(\d+|\d+-\d+)+')
             assert resiudes_pattern.match(chain_to_bind_hotspot)
@@ -209,15 +235,18 @@ def create_design_tuples(args: argparse.Namespace) -> List[Design]:
         if args.protocol == 'binder':
             assert structure_fname is not None
             assert chain_to_bind is not None
-            assert (designed_sequence_len is not None) or (initial_sequence is not None) or (chain_to_mimic is not None)
+            assert (designed_sequence_len is not None) or (
+                initial_sequence is not None) or (chain_to_mimic is not None)
         elif args.protocol == 'hallucination':
             assert designed_sequence_len is not None
         elif args.protocol == 'fixbb':
             assert structure_fname is not None
             assert chain_to_mimic is not None
 
-        
-        design_tuples.append(Design(structure_fname, structure_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence))
+        design_tuples.append(
+            Design(structure_fname, structure_title, chain_to_mimic,
+                   chain_to_bind, chain_to_bind_hotspot, designed_sequence_len,
+                   initial_sequence))
     return design_tuples
 
 
@@ -236,11 +265,10 @@ def main():
         type=str,
         default=None,
         help='File containing structures to use for fixbb or binder protocol')
-    parser.add_argument(
-        '--design_params',
-        default=None,
-        type=str,
-        help='Csv file containing design protocol parameters')
+    parser.add_argument('--design_params',
+                        default=None,
+                        type=str,
+                        help='Csv file containing design protocol parameters')
 
     parser.add_argument('--num_seqs',
                         default=1,
@@ -250,25 +278,40 @@ def main():
     args = parser.parse_args()
 
     design_tuples = create_design_tuples(args)
-        
+
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
-                out_fname_prefix = os.path.join(args.out_dir, f"fixbb_{design.structure_title}_{i}")
-                fixbb(design.structure_fname, design.chain_to_mimic, out_fname_prefix, seed=i)
-    
+                out_fname_prefix = os.path.join(
+                    args.out_dir, f"fixbb_{design.structure_title}_{i}")
+                fixbb(design.structure_fname,
+                      design.chain_to_mimic,
+                      out_fname_prefix,
+                      seed=i)
+
     elif args.protocol == 'binder':
         for design in design_tuples:
             for i in range(args.num_seqs):
-                out_fname_prefix = os.path.join(args.out_dir, f"binder_{design.structure_title}_{i}")
-                binder(design.structure_fname, design.chain_to_mimic, design.chain_to_bind, design.chain_to_bind_hotspot, design.designed_sequence_len, design.initial_sequence, out_fname_prefix, seed=i)
+                out_fname_prefix = os.path.join(
+                    args.out_dir, f"binder_{design.structure_title}_{i}")
+                binder(design.structure_fname,
+                       design.chain_to_mimic,
+                       design.chain_to_bind,
+                       design.chain_to_bind_hotspot,
+                       design.designed_sequence_len,
+                       design.initial_sequence,
+                       out_fname_prefix,
+                       seed=i)
 
     elif args.protocol == 'hallucination':
         for design in design_tuples:
             for i in range(args.num_seqs):
                 out_fname_prefix = os.path.join(
-                    args.out_dir, f'hallucination_{design.designed_sequence_len}_{i}')
-                hallucination(design.designed_sequence_len, out_fname_prefix, seed=i)
+                    args.out_dir,
+                    f'hallucination_{design.designed_sequence_len}_{i}')
+                hallucination(design.designed_sequence_len,
+                              out_fname_prefix,
+                              seed=i)
 
 
 if __name__ == "__main__":
