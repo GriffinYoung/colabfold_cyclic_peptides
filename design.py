@@ -1,19 +1,23 @@
+import numpy as np
 from typing import List
 import argparse
 import os
 import re
 from collections import namedtuple
-from schrodinger.structure import StructureReader
-from colabdesign import mk_afdesign_model, clear_mem
-
-import jax
-import jax.numpy as jnp
-from colabdesign.af.alphafold.common import residue_constants
 import pandas as pd
-
 import requests
 
 import util
+
+from schrodinger.structure import StructureReader, Structure
+
+
+
+# import jax
+# import jax.numpy as jnp
+# from colabdesign.af.alphafold.common import residue_constants
+# from colabdesign import mk_afdesign_model, clear_mem
+
 
 
 def download_pdb(pdb_id):
@@ -179,33 +183,23 @@ def binder(pdb_filename: str,
 
 
 # Declare designt tuple namedtuple
-Design = namedtuple('Design', [
-    'protocol', 'structure_fname', 'structure_title', 'chain_to_mimic',
+Design = namedtuple('Design', ['structure_fname', 'jobname', 'chain_to_mimic',
     'chain_to_bind', 'chain_to_bind_hotspot', 'designed_sequence_len',
     'initial_sequence'
 ])
 
 
-def create_design_tuples(args: argparse.Namespace) -> List[Design]:
-    sts = []
-    if args.structure_file is not None:
-        sts = list(StructureReader(args.structure_file))
-    chain_df = pd.read_csv(args.design_params,
-                           header=None,
-                           columns=[
-                               'pdb_id', 'st_title', 'chain_to_mimic',
-                               'chain_to_bind', 'chain_to_bind_hotspot',
-                               'designed_sequence_len', 'initial_sequence'
-                           ])
+def create_design_tuples(sts: List[Structure], protocol: str, chain_df: pd.DataFrame) -> List[Design]:
     design_tuples = []
     for pdb_id, st_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence in chain_df.values:
-
-        assert pdb_id is not None or st_title is not None
+        jobname = protocol
+        # Load structure from file or download from PDB
+        assert pdb_id is None or st_title is None
         structure_fname = None
         if pdb_id is not None:
-            structure_title = pdb_id
+            jobname += f"_{pdb_id}"
             structure_fname = f'{pdb_id}.pdb'
-            download_pdb(pdb_id, structure_fname)
+            download_pdb(pdb_id)
         if st_title is not None:
             sts_with_title = [st for st in sts if st.title == st_title]
             if len(sts_with_title) != 1:
@@ -213,38 +207,45 @@ def create_design_tuples(args: argparse.Namespace) -> List[Design]:
                     f'Expected 1 structure with title {st_title}, found {len(sts_with_title)}'
                 )
             st = sts_with_title[0]
-            structure_title = st_title
+            jobname += f"_{st_title}"
             structure_fname = f'{st_title}.pdb'
             st.write(structure_fname)
-        if chain_to_mimic is not None:
-            chain_to_mimic = chain_to_mimic.upper()
-            structure_title += f'_mimic_{chain_to_mimic}'
+
+        # Designate chains to mimic and bind
         if chain_to_bind is not None:
             chain_to_bind = chain_to_bind.upper()
-            structure_title += f'_bind_{chain_to_bind}'
+            jobname += f'_bind_{chain_to_bind}'
+        if chain_to_mimic is not None:
+            chain_to_mimic = chain_to_mimic.upper()
+            jobname += f'_mimic_{chain_to_mimic}'
 
+        # Designate sequence length, initial sequence, and hotspot
         if designed_sequence_len is not None:
             designed_sequence_len = int(designed_sequence_len)
+            jobname += f'_len_{designed_sequence_len}'
         if chain_to_bind_hotspot is not None:
             resiudes_pattern = re.compile(r'(\d+|\d+-\d+,)*(\d+|\d+-\d+)+')
             assert resiudes_pattern.match(chain_to_bind_hotspot)
+            jobname += f'_hotspot_{chain_to_bind_hotspot}'
         if initial_sequence is not None:
             initial_sequence = initial_sequence.upper()
             designed_sequence_len = len(initial_sequence)
+            jobname += f'_init_{initial_sequence}'
 
-        if args.protocol == 'binder':
+        # Check that all required arguments are present
+        if protocol == 'binder':
             assert structure_fname is not None
             assert chain_to_bind is not None
             assert (designed_sequence_len is not None) or (
                 initial_sequence is not None) or (chain_to_mimic is not None)
-        elif args.protocol == 'hallucination':
+        elif protocol == 'hallucination':
             assert designed_sequence_len is not None
-        elif args.protocol == 'fixbb':
+        elif protocol == 'fixbb':
             assert structure_fname is not None
             assert chain_to_mimic is not None
 
         design_tuples.append(
-            Design(structure_fname, structure_title, chain_to_mimic,
+            Design(structure_fname, jobname, chain_to_mimic,
                    chain_to_bind, chain_to_bind_hotspot, designed_sequence_len,
                    initial_sequence))
     return design_tuples
@@ -265,7 +266,7 @@ def main():
         type=str,
         default=None,
         help='File containing structures to use for fixbb or binder protocol')
-    parser.add_argument('--design_params',
+    parser.add_argument('--design_parameters',
                         default=None,
                         type=str,
                         help='Csv file containing design protocol parameters')
@@ -277,13 +278,27 @@ def main():
 
     args = parser.parse_args()
 
-    design_tuples = create_design_tuples(args)
+    sts = []
+    if args.structure_file is not None:
+        sts = list(StructureReader(args.structure_file))
+    chain_df = pd.read_csv(args.design_parameters,
+                           header=None,
+                           delimiter=";",
+                           names=[
+                               'pdb_id', 'st_title', 'chain_to_mimic',
+                               'chain_to_bind', 'chain_to_bind_hotspot',
+                               'designed_sequence_len', 'initial_sequence'
+                           ])
+    chain_df = chain_df.replace(np.NaN, None)
+    design_tuples = create_design_tuples(sts, args.protocol, chain_df)
+
+    import pdb;pdb.set_trace()
 
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
                 out_fname_prefix = os.path.join(
-                    args.out_dir, f"fixbb_{design.structure_title}_{i}")
+                    args.out_dir, f"fixbb_{design.jobname}_{i}")
                 fixbb(design.structure_fname,
                       design.chain_to_mimic,
                       out_fname_prefix,
@@ -293,7 +308,7 @@ def main():
         for design in design_tuples:
             for i in range(args.num_seqs):
                 out_fname_prefix = os.path.join(
-                    args.out_dir, f"binder_{design.structure_title}_{i}")
+                    args.out_dir, f"binder_{design.jobname}_{i}")
                 binder(design.structure_fname,
                        design.chain_to_mimic,
                        design.chain_to_bind,
@@ -308,7 +323,7 @@ def main():
             for i in range(args.num_seqs):
                 out_fname_prefix = os.path.join(
                     args.out_dir,
-                    f'hallucination_{design.designed_sequence_len}_{i}')
+                    f'hallucination_{design.jobname}_{i}')
                 hallucination(design.designed_sequence_len,
                               out_fname_prefix,
                               seed=i)
