@@ -2,7 +2,7 @@ from typing import List
 import argparse
 import os
 import re
-from collection import namedtuple
+from collections import namedtuple
 from schrodinger.structure import StructureReader
 from colabdesign import mk_afdesign_model, clear_mem
 
