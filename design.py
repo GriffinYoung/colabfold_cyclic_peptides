@@ -292,8 +292,6 @@ def main():
     chain_df = chain_df.replace(np.NaN, None)
     design_tuples = create_design_tuples(sts, args.protocol, chain_df)
 
-    import pdb;pdb.set_trace()
-
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
