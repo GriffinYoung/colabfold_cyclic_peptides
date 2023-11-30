@@ -13,10 +13,10 @@ from schrodinger.structure import StructureReader, Structure
 
 
 
-# import jax
-# import jax.numpy as jnp
-# from colabdesign.af.alphafold.common import residue_constants
-# from colabdesign import mk_afdesign_model, clear_mem
+import jax
+import jax.numpy as jnp
+from colabdesign.af.alphafold.common import residue_constants
+from colabdesign import mk_afdesign_model, clear_mem
 
 
 
