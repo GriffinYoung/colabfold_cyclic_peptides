@@ -3,6 +3,7 @@
 $SCHRODINGER/run schrodinger_virtualenv.py venv
 source venv/bin/activate
 python -m pip -q install git+https://github.com/sokrypton/ColabDesign.git@v1.1.1
+pip freeze
 
 # Try copying existing environment
 #gsutil -m cp -r gs://alphafold-environments/cyclic_peptide_design_environment/ params
