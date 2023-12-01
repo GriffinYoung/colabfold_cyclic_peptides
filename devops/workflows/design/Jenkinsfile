@@ -14,8 +14,6 @@ pipeline {
             agent {
                 label "gpu-cloud"
             }
-            environment {
-            }
             steps {
                 sh 'run.sh'
             }
@@ -47,16 +45,7 @@ pipeline {
                 sh './scripts/dashboard_backtest/collect_results.sh'
                 sh 'tar -czf results.tar.gz results'
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'results.tar.gz', onlyIfSuccessful: true
-                    emailext attachLog: true,
-                    body: '$DEFAULT_CONTENT',
-                        to: 'suraj.gattani@schrodinger.com',
-                        recipientProviders: [],
-                        subject: '${JOB_NAME}-${BUILD_NUMBER}'
-                }
-            }
+ 
         }
     }
 }
