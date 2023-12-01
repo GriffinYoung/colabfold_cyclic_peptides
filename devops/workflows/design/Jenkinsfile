@@ -7,7 +7,10 @@ pipeline {
             name: 'PROTOCOL', 
             choices: ['fixbb', 'binder', 'hallucination'], 
             description: '')
-        file(name: 'MY_FILE', description: 'Upload your file')
+    string(name: 'JOB_NAME', defaultValue: 'colabdesign', description: 'Name of the job')
+    string(name: 'num_seqs', defaultValue: '1', description: 'How many sequences to design per input')
+    file(name: 'structures_file.maegz', description: 'Upload your file')
+    file(name: 'design_parameters.csv', description: 'Upload your file')
     }
     stages {
         stage('Run colabdesign') {
@@ -15,19 +18,10 @@ pipeline {
                 label "gpu-cloud"
             }
             steps {
-                sh 'run.sh'
-            }
-        }
-        stage('Wait for completion'){
-            agent {
-                label "gpu"
-            }
-            environment {
-                USER_PASS_SECRET = credentials('suraj-jenkins-password')
-                POSTGRES_PASSWORD = credentials('ld_etc_db_gcs')
-            }
-            steps {
-                sh "sleep 16h"
+                sh 'ls'
+                sh 'source devops/workflows/design/set_sdgr_and_gcp.sh'
+                sh 'source devops/workflows/design/install_colabdesign.sh'
+                sh 'source devops/workflows/design/run_colabdesign.sh'
             }
         }
         stage('Collect results') {
