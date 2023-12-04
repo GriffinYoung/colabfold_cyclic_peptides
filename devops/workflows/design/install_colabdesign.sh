@@ -2,6 +2,7 @@
 
 $SCHRODINGER/run schrodinger_virtualenv.py venv
 source venv/bin/activate
+python -m pip -q install dm-haiku==0.0.10
 python -m pip -q install git+https://github.com/sokrypton/ColabDesign.git@v1.1.1
 
 # Try copying existing environment
