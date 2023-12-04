@@ -23,12 +23,14 @@ pipeline {
             steps {
                 unstash 'structures_file.maegz'
                 unstash 'design_parameters.csv'
-                sh 'ls'
-                // sh 'source devops/workflows/design/activate_gcp.sh'
-                sh 'mkdir -p raw_results'
-                sh 'source devops/workflows/design/install_colabdesign.sh'
-                sh 'source devops/workflows/design/run_cyclic_colabdesign.sh'
-                sh 'tar -czf raw_results.tgz raw_results'
+                // source devops/workflows/design/activate_gcp.sh
+                sh '''
+                    ls
+                    mkdir -p raw_results
+                    source devops/workflows/design/install_colabdesign.sh
+                    source devops/workflows/design/run_colabdesign.sh
+                    tar -czf raw_results.tgz raw_results
+                    '''
                 archiveArtifacts artifacts: 'raw_results.tgz', fingerprint: true
             }
         }
