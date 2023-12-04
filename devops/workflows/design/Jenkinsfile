@@ -28,7 +28,7 @@ pipeline {
                 sh '''
                     ls
                     mkdir -p raw_results
-                    source devops/workflows/design/run_cyclic_colabdesign.sh $params.protocol $params.num_seqs
+                    source devops/workflows/design/run_cyclic_colabdesign.sh "$params.protocol" "$params.num_seqs"
                     tar -czf raw_results.tgz raw_results
                     '''
                 archiveArtifacts artifacts: 'raw_results.tgz', fingerprint: true
