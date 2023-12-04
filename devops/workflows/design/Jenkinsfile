@@ -21,7 +21,7 @@ pipeline {
                 SCHRODINGER = "/mnt/squashsuites/suite2023-3-build081"
             }
             steps {
-                unstash 'structures_file.maegz'
+                unstash 'structures.maegz'
                 unstash 'design_parameters.csv'
                 // source devops/workflows/design/activate_gcp.sh
                 sh '''
