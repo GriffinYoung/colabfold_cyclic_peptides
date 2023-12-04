@@ -4,12 +4,12 @@ pipeline {
     agent none
     parameters {
         choice(
-            name: 'PROTOCOL', 
+            name: 'protocol', 
             choices: ['fixbb', 'binder', 'hallucination'], 
             description: '')
-        string(name: 'JOB_NAME', defaultValue: 'colabdesign', description: 'Name of the job')
+        string(name: 'jobname', defaultValue: 'colabdesign', description: 'Name of the job')
         string(name: 'num_seqs', defaultValue: '1', description: 'How many sequences to design per input')
-        stashedFile 'structures_file.maegz'
+        stashedFile 'structures.maegz'
         stashedFile 'design_parameters.csv'
     }
     stages {
