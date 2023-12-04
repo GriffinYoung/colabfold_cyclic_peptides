@@ -13,10 +13,12 @@ from schrodinger.structure import StructureReader, Structure
 
 
 
-# import jax
-# import jax.numpy as jnp
-# from colabdesign.af.alphafold.common import residue_constants
-# from colabdesign import mk_afdesign_model, clear_mem
+import jax
+import jax.numpy as jnp
+from colabdesign.af.alphafold.common import residue_constants
+from colabdesign import mk_afdesign_model, clear_mem
+
+
 
 def download_pdb(pdb_id):
     url = f'https://files.rcsb.org/download/{pdb_id}.pdb'
@@ -289,16 +291,6 @@ def main():
                            ])
     chain_df = chain_df.replace(np.NaN, None)
     design_tuples = create_design_tuples(sts, args.protocol, chain_df)
-    import io
-    from Bio.PDB import PDBParser
-    for design in design_tuples:
-        with open(design.structure_fname, 'r') as f:
-            pdb_str = f.read()
-            pdb_fh = io.StringIO(pdb_str)
-            parser = PDBParser(QUIET=True)
-            structure = parser.get_structure('none', pdb_fh)
-            models = list(structure.get_models())
-            print(f"{len(models)} in {design.structure_fname}")
 
     if args.protocol == 'fixbb':
         for design in design_tuples:
