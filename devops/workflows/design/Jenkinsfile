@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Run colabdesign') {
             agent {
-                label "cpu-cloud"
+                label "gpu-cloud"
             }
             environment {
                 SCHRODINGER = "/mnt/squashsuites/suite2023-3-build081"
@@ -27,11 +27,10 @@ pipeline {
                     def protocol = params.protocol
                     def num_seqs = params.num_seqs
                     // source devops/workflows/design/activate_gcp.sh
-                    // source devops/workflows/design/install_colabdesign.sh
                     sh '''
                         ls
                         mkdir -p raw_results
-                        
+                        source devops/workflows/design/install_colabdesign.sh
                         source devops/workflows/design/run_cyclic_colabdesign.sh ${protocol} ${num_seqs}
                         tar -czf raw_results.tgz raw_results
                         '''
