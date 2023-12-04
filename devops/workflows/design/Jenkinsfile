@@ -28,6 +28,7 @@ pipeline {
                 sh '''
                     ls
                     mkdir -p raw_results
+                    echo ${params.protocol}
                     source devops/workflows/design/run_cyclic_colabdesign.sh ${params.protocol} ${params.num_seqs}
                     tar -czf raw_results.tgz raw_results
                     '''
