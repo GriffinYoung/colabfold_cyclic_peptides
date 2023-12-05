@@ -173,7 +173,7 @@ def binder(pdb_filename: str,
                            learning_rate=0.1,
                            norm_seq_grad=True)  # What is norm_seq_grad?
 
-    af_model.design_pssm_semigreeedy(120,
+    af_model.design_pssm_semigreedy(120,
                                      32,
                                      num_recycles=20,
                                      models=af_model._model_names,
