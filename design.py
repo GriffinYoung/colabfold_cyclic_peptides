@@ -166,12 +166,13 @@ def binder(pdb_filename: str,
     af_model.restart(
         seed=seed, seq=initial_sequence
     )  # If binder_seq, pass that here and set binder_len to len(binder_seq) (must be all caps)
+
     af_model.set_optimizer(optimizer=GD_method,
                            learning_rate=0.1,
                            norm_seq_grad=True)  # What is norm_seq_grad?
 
-    af_model.design_pssm_semigreedy(120,
-                                    32,
+    af_model.design_pssm_semigreedy(1,
+                                    1,
                                     num_recycles=1,
                                     models=af_model._model_names,
                                     dropout=True)
