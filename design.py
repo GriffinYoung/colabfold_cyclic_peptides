@@ -172,7 +172,7 @@ def binder(pdb_filename: str,
 
     af_model.design_pssm_semigreedy(120,
                                     32,
-                                    num_recycles=20,
+                                    num_recycles=1,
                                     models=af_model._model_names,
                                     dropout=True)
 
