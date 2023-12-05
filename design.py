@@ -148,7 +148,7 @@ def binder(pdb_filename: str,
     af_model = mk_afdesign_model(
         protocol="binder",
         use_multimer=True,
-        num_recycles=20,
+        num_recycles=1,
         recycle_mode="sample")  # What is recycle_mode?
     af_model.prep_inputs(
         pdb_filename=pdb_filename,
