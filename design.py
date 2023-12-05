@@ -11,13 +11,10 @@ import util
 
 from schrodinger.structure import StructureReader, Structure
 
-
-
 import jax
 import jax.numpy as jnp
 from colabdesign.af.alphafold.common import residue_constants
 from colabdesign import mk_afdesign_model, clear_mem
-
 
 
 def download_pdb(pdb_id):
@@ -174,22 +171,23 @@ def binder(pdb_filename: str,
                            norm_seq_grad=True)  # What is norm_seq_grad?
 
     af_model.design_pssm_semigreedy(120,
-                                     32,
-                                     num_recycles=20,
-                                     models=af_model._model_names,
-                                     dropout=True)
+                                    32,
+                                    num_recycles=20,
+                                    models=af_model._model_names,
+                                    dropout=True)
 
     save_outputs(af_model, out_fname_prefix, seed)
 
 
 # Declare designt tuple namedtuple
-Design = namedtuple('Design', ['structure_fname', 'jobname', 'chain_to_mimic',
-    'chain_to_bind', 'chain_to_bind_hotspot', 'designed_sequence_len',
-    'initial_sequence'
+Design = namedtuple('Design', [
+    'structure_fname', 'jobname', 'chain_to_mimic', 'chain_to_bind',
+    'chain_to_bind_hotspot', 'designed_sequence_len', 'initial_sequence'
 ])
 
 
-def create_design_tuples(sts: List[Structure], protocol: str, chain_df: pd.DataFrame) -> List[Design]:
+def create_design_tuples(sts: List[Structure], protocol: str,
+                         chain_df: pd.DataFrame) -> List[Design]:
     design_tuples = []
     for pdb_id, st_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence in chain_df.values:
         jobname = protocol
@@ -245,8 +243,8 @@ def create_design_tuples(sts: List[Structure], protocol: str, chain_df: pd.DataF
             assert chain_to_mimic is not None
 
         design_tuples.append(
-            Design(structure_fname, jobname, chain_to_mimic,
-                   chain_to_bind, chain_to_bind_hotspot, designed_sequence_len,
+            Design(structure_fname, jobname, chain_to_mimic, chain_to_bind,
+                   chain_to_bind_hotspot, designed_sequence_len,
                    initial_sequence))
     return design_tuples
 
@@ -295,8 +293,8 @@ def main():
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
-                out_fname_prefix = os.path.join(
-                    args.out_dir, f"fixbb_{design.jobname}_{i}")
+                out_fname_prefix = os.path.join(args.out_dir,
+                                                f"fixbb_{design.jobname}_{i}")
                 fixbb(design.structure_fname,
                       design.chain_to_mimic,
                       out_fname_prefix,
@@ -320,8 +318,7 @@ def main():
         for design in design_tuples:
             for i in range(args.num_seqs):
                 out_fname_prefix = os.path.join(
-                    args.out_dir,
-                    f'hallucination_{design.jobname}_{i}')
+                    args.out_dir, f'hallucination_{design.jobname}_{i}')
                 hallucination(design.designed_sequence_len,
                               out_fname_prefix,
                               seed=i)
