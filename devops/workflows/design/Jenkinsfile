@@ -19,6 +19,7 @@ pipeline {
             }
             environment {
                 SCHRODINGER = "/mnt/squashsuites/suite2023-3-build081"
+                TF_CPP_MIN_LOG_LEVEL = 0
             }
             steps {
                 unstash 'structures.maegz'
