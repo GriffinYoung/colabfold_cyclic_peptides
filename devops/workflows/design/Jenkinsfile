@@ -46,7 +46,7 @@ pipeline {
                 SCHRODINGER = "/mnt/squashsuites/suite2023-3-build081"
             }
             steps {
-                copyArtifacts filter: 'raw_results.tgz', fingerprintArtifacts: true, selector: specific('Run colabdesign')
+                copyArtifacts filter: 'raw_results.tgz', fingerprintArtifacts: true, projectName: env.JOB_NAME, selector: specific(env.BUILD_NUMBER)
                 sh 'tar -xzf raw_results.tgz'
                 sh 'mkdir -p results'
                 sh 'source devops/workflows/design/close_cycles.sh'
