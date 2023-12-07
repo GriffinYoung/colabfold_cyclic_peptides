@@ -9,7 +9,7 @@ micromamba create -n colabdesign jaxlib=*=*cuda* jax cuda-nvcc -c conda-forge -c
 micromamba activate colabdesign
 
 python3 -m pip install cmake
-python -m pip -q install git+https://github.com/sokrypton/ColabDesign.git@v1.1.1
+python3 -m pip install git+https://github.com/sokrypton/ColabDesign.git@v1.1.1
 
 python3 -c "import jax; print(jax.devices())"
 
