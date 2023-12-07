@@ -2,7 +2,7 @@
 
 curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj -C . bin/micromamba
 eval "$(./bin/micromamba shell hook --shell bash)"
-micromamba create -n colabdesign jaxlib=*=*cuda* jax cuda-nvcc -c conda-forge -c nvidia
+micromamba create -n colabdesign jaxlib=*=*cuda* jax cuda-nvcc requests -c conda-forge -c nvidia
 micromamba activate colabdesign
 
 python3 -m pip install cmake
