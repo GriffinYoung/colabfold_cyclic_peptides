@@ -6,10 +6,9 @@ import re
 from collections import namedtuple
 import pandas as pd
 import requests
+import shutil
 
 import util
-
-from schrodinger.structure import StructureReader, Structure
 
 import jax
 import jax.numpy as jnp
@@ -49,16 +48,9 @@ def add_rg_loss(self, weight=0.1):
 
 def save_outputs(af_model, out_fname_prefix, seed):
     print("Saving halluciantion...")
-    temp_pdb = out_fname_prefix + ".pdb"
-    af_model.save_pdb(temp_pdb)
-    sts = list(StructureReader(temp_pdb))
-    os.remove(temp_pdb)
-
     seed_prefix = f"{out_fname_prefix}_{seed}"
-    for i, st in enumerate(sts):
-        design_prefix = f"{seed_prefix}_{i}"
-        st.title = design_prefix
-        st.write(f"{design_prefix}.pdb")
+    temp_pdb = seed_prefix + ".pdb"
+    af_model.save_pdb(temp_pdb)
 
     best_seq = af_model.get_seqs()[0]  # I think this list has only one element
     with open(f"{seed_prefix}.sequence", "w") as f:
@@ -187,7 +179,7 @@ Design = namedtuple('Design', [
 ])
 
 
-def create_design_tuples(sts: List[Structure], protocol: str,
+def create_design_tuples(pdb_dir: str, protocol: str,
                          chain_df: pd.DataFrame) -> List[Design]:
     design_tuples = []
     for pdb_id, st_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence in chain_df.values:
@@ -197,18 +189,12 @@ def create_design_tuples(sts: List[Structure], protocol: str,
         structure_fname = None
         if pdb_id is not None:
             jobname += f"_{pdb_id}"
-            structure_fname = f'{pdb_id}.pdb'
+            structure_fname = os.path.join(pdb_dir, f'{pdb_id}.pdb')
             download_pdb(pdb_id)
+            shutil.move(f'{pdb_id}.pdb', pdb_dir)
         if st_title is not None:
-            sts_with_title = [st for st in sts if st.title == st_title]
-            if len(sts_with_title) != 1:
-                raise ValueError(
-                    f'Expected 1 structure with title {st_title}, found {len(sts_with_title)}'
-                )
-            st = sts_with_title[0]
             jobname += f"_{st_title}"
-            structure_fname = f'{st_title}.pdb'
-            st.write(structure_fname)
+            structure_fname = os.path.join(pdb_dir, f'{st_title}.pdb')
 
         # Designate chains to mimic and bind
         if chain_to_bind is not None:
@@ -261,10 +247,10 @@ def main():
                         type=str,
                         help='Directory to save results in')
     parser.add_argument(
-        '--structure_file',
+        '--pdb_dir',
         type=str,
         default=None,
-        help='File containing structures to use for fixbb or binder protocol')
+        help='File containing pdb structures to use for fixbb or binder protocol')
     parser.add_argument('--design_parameters',
                         default=None,
                         type=str,
@@ -277,9 +263,6 @@ def main():
 
     args = parser.parse_args()
 
-    sts = []
-    if args.structure_file is not None:
-        sts = list(StructureReader(args.structure_file))
     chain_df = pd.read_csv(args.design_parameters,
                            header=None,
                            delimiter=";",
@@ -289,7 +272,7 @@ def main():
                                'designed_sequence_len', 'initial_sequence'
                            ])
     chain_df = chain_df.replace(np.NaN, None)
-    design_tuples = create_design_tuples(sts, args.protocol, chain_df)
+    design_tuples = create_design_tuples(args.pdb_dir, args.protocol, chain_df)
 
     if args.protocol == 'fixbb':
         for design in design_tuples:
