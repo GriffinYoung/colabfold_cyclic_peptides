@@ -75,7 +75,7 @@ def fixbb(pdb_filename: str, chain: str, out_fname_prefix: str, seed: int = 0):
     util.add_cyclic_offset(af_model)
 
     af_model.restart(seed=seed)
-    af_model.design_3stage(1,1,1)
+    af_model.design_3stage()
 
     save_outputs(af_model, out_fname_prefix, seed)
 
@@ -163,8 +163,8 @@ def binder(pdb_filename: str,
                            learning_rate=0.1,
                            norm_seq_grad=True)  # What is norm_seq_grad?
 
-    af_model.design_pssm_semigreedy(1,
-                                    1,
+    af_model.design_pssm_semigreedy(120,
+                                    32,
                                     num_recycles=1,
                                     models=af_model._model_names,
                                     dropout=True)
