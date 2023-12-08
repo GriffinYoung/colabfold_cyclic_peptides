@@ -190,8 +190,9 @@ def create_design_tuples(pdb_dir: str, protocol: str,
         if pdb_id is not None:
             jobname += f"_{pdb_id}"
             structure_fname = os.path.join(pdb_dir, f'{pdb_id}.pdb')
-            download_pdb(pdb_id)
-            shutil.move(f'{pdb_id}.pdb', pdb_dir)
+            if not os.path.exists(structure_fname):
+                download_pdb(pdb_id)
+                shutil.move(f'{pdb_id}.pdb', pdb_dir)
         if st_title is not None:
             jobname += f"_{st_title}"
             structure_fname = os.path.join(pdb_dir, f'{st_title}.pdb')
@@ -250,7 +251,8 @@ def main():
         '--pdb_dir',
         type=str,
         default=None,
-        help='File containing pdb structures to use for fixbb or binder protocol')
+        help=
+        'File containing pdb structures to use for fixbb or binder protocol')
     parser.add_argument('--design_parameters',
                         default=None,
                         type=str,
