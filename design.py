@@ -179,7 +179,7 @@ Design = namedtuple('Design', [
 ])
 
 
-def create_design_tuples(pdb_dir: str, protocol: str,
+def create_design_tuples(protocol: str,
                          chain_df: pd.DataFrame) -> List[Design]:
     design_tuples = []
     for pdb_id, st_title, chain_to_mimic, chain_to_bind, chain_to_bind_hotspot, designed_sequence_len, initial_sequence in chain_df.values:
@@ -190,9 +190,8 @@ def create_design_tuples(pdb_dir: str, protocol: str,
         if pdb_id is not None:
             jobname += f"_{pdb_id}"
             structure_fname = f'{pdb_id}.pdb'
-            if not os.path.exists(os.path.join(pdb_dir, structure_fname)):
+            if not os.path.exists(structure_fname):
                 download_pdb(pdb_id)
-                shutil.move(f'{pdb_id}.pdb', pdb_dir)
         if st_title is not None:
             jobname += f"_{st_title}"
             structure_fname = f'{st_title}.pdb'
@@ -247,12 +246,6 @@ def main():
     parser.add_argument('out_dir',
                         type=str,
                         help='Directory to save results in')
-    parser.add_argument(
-        '--pdb_dir',
-        type=str,
-        default=None,
-        help=
-        'File containing pdb structures to use for fixbb or binder protocol')
     parser.add_argument('--design_parameters',
                         default=None,
                         type=str,
@@ -274,9 +267,8 @@ def main():
                                'designed_sequence_len', 'initial_sequence'
                            ])
     chain_df = chain_df.replace(np.NaN, None)
-    design_tuples = create_design_tuples(args.pdb_dir, args.protocol, chain_df)
+    design_tuples = create_design_tuples(args.protocol, chain_df)
 
-    os.chdir(args.pdb_dir)
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
