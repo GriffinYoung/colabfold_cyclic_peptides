@@ -189,8 +189,8 @@ def create_design_tuples(pdb_dir: str, protocol: str,
         structure_fname = None
         if pdb_id is not None:
             jobname += f"_{pdb_id}"
-            structure_fname = os.path.join(pdb_dir, f'{pdb_id}.pdb')
-            if not os.path.exists(structure_fname):
+            structure_fname = f'{pdb_id}.pdb'
+            if not os.path.exists(os.path.join(pdb_dir, structure_fname)):
                 download_pdb(pdb_id)
                 shutil.move(f'{pdb_id}.pdb', pdb_dir)
         if st_title is not None:
