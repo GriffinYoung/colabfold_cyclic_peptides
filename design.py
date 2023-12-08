@@ -75,7 +75,7 @@ def fixbb(pdb_filename: str, chain: str, out_fname_prefix: str, seed: int = 0):
     util.add_cyclic_offset(af_model)
 
     af_model.restart(seed=seed)
-    af_model.design_3stage()
+    af_model.design_3stage(1,1,1)
 
     save_outputs(af_model, out_fname_prefix, seed)
 
