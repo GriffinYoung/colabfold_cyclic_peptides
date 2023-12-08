@@ -276,6 +276,7 @@ def main():
     chain_df = chain_df.replace(np.NaN, None)
     design_tuples = create_design_tuples(args.pdb_dir, args.protocol, chain_df)
 
+    os.chdir(args.pdb_dir)
     if args.protocol == 'fixbb':
         for design in design_tuples:
             for i in range(args.num_seqs):
