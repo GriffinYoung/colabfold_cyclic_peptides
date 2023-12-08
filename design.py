@@ -195,7 +195,7 @@ def create_design_tuples(pdb_dir: str, protocol: str,
                 shutil.move(f'{pdb_id}.pdb', pdb_dir)
         if st_title is not None:
             jobname += f"_{st_title}"
-            structure_fname = os.path.join(pdb_dir, f'{st_title}.pdb')
+            structure_fname = f'{st_title}.pdb'
 
         # Designate chains to mimic and bind
         if chain_to_bind is not None:
