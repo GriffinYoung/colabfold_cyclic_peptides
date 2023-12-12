@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 import shutil
 import tempfile
+import contextlib
 
 
 import util
@@ -48,18 +49,24 @@ def add_rg_loss(self, weight=0.1):
     self._callbacks["model"]["loss"].append(loss_fn)
     self.opt["weights"]["rg"] = weight
 
-
+# Context manager to temporarily enter a temporary directory
+# and return to the original directory when done.
+@contextlib.contextmanager
+def tempdir():
+    cwd = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        os.chdir(tmpdirname)
+        yield
+        os.chdir(cwd)    
 
 def save_outputs(af_model, out_fname_prefix):
     print("Saving halluciantion...")
     # save to temp dir
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        os.chdir(tmpdirname)
+    with tempdir():
         af_model.save_pdb("temp.pdb")
         parser = PDB.PDBParser()
         structure = parser.get_structure('first', 'temp.pdb')
         first_model = structure[0]
-        os.chdir("..")
 
     io = PDB.PDBIO()
     io.set_structure(first_model)
