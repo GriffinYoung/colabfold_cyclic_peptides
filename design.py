@@ -7,9 +7,12 @@ from collections import namedtuple
 import pandas as pd
 import requests
 import shutil
+import tempfile
+
 
 import util
 
+from Bio import PDB
 import jax
 import jax.numpy as jnp
 from colabdesign.af.alphafold.common import residue_constants
@@ -46,14 +49,24 @@ def add_rg_loss(self, weight=0.1):
     self.opt["weights"]["rg"] = weight
 
 
-def save_outputs(af_model, out_fname_prefix, seed):
+
+def save_outputs(af_model, out_fname_prefix):
     print("Saving halluciantion...")
-    seed_prefix = f"{out_fname_prefix}_{seed}"
-    temp_pdb = seed_prefix + ".pdb"
-    af_model.save_pdb(temp_pdb)
+    # save to temp dir
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        os.chdir(tmpdirname)
+        af_model.save_pdb("temp.pdb")
+        parser = PDB.PDBParser()
+        structure = parser.get_structure('first', 'temp.pdb')
+        first_model = structure[0]
+        os.chdir("..")
+
+    io = PDB.PDBIO()
+    io.set_structure(first_model)
+    io.save(f"{out_fname_prefix}.pdb")
 
     best_seq = af_model.get_seqs()[0]  # I think this list has only one element
-    with open(f"{seed_prefix}.sequence", "w") as f:
+    with open(f"{out_fname_prefix}.sequence", "w") as f:
         f.write(f"{best_seq}")
 
 
@@ -77,7 +90,7 @@ def fixbb(pdb_filename: str, chain: str, out_fname_prefix: str, seed: int = 0):
     af_model.restart(seed=seed)
     af_model.design_3stage()
 
-    save_outputs(af_model, out_fname_prefix, seed)
+    save_outputs(af_model, out_fname_prefix)
 
 
 def hallucination(length: int, out_fname_prefix: str, seed=0):
@@ -112,7 +125,7 @@ def hallucination(length: int, out_fname_prefix: str, seed=0):
     af_model.set_seq(seq=af_model.aux["seq"]["pseudo"])
     af_model.design_3stage(50, 50, 10)
 
-    save_outputs(af_model, out_fname_prefix, seed)
+    save_outputs(af_model, out_fname_prefix)
 
 
 def binder(pdb_filename: str,
@@ -169,7 +182,7 @@ def binder(pdb_filename: str,
                                     models=af_model._model_names,
                                     dropout=True)
 
-    save_outputs(af_model, out_fname_prefix, seed)
+    save_outputs(af_model, out_fname_prefix)
 
 
 # Declare designt tuple namedtuple

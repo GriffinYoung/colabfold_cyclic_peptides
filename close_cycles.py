@@ -4,6 +4,7 @@ from schrodinger.structutils.measure import measure_distance
 from schrodinger.protein.rotamers import Rotamers
 import os
 import argparse
+import shutil
 
 MAX_PEPTIDE_BOND_LENGTH = 1.5
 MAX_DISULFIDE_BOND_LENGTH = 3.0
@@ -101,6 +102,19 @@ def main():
             os.makedirs(jobdir, exist_ok=True)
         outpath = os.path.join(jobdir, outfile)
         st.write(outpath)
+
+        # Copy sequence file to jobdir
+        seq_fname = os.path.splitext(fname)[0] + '.sequence'
+        seq_path = os.path.join(args.input_dir, seq_fname)
+        if os.path.exists(seq_path):
+            with open(seq_path, 'r') as f:
+                seq = f.read()
+
+            shutil.copy(seq_path, jobdir)
+
+            # Copy sequence to fasta file
+            with open(os.path.join(args.out_dir, 'sequences.fasta'), 'a') as f:
+                f.write(f'>{os.path.splitext(fname)[0]}\n{seq}\n')
 
 
 if __name__ == "__main__":
